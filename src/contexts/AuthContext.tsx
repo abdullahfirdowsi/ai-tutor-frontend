@@ -6,9 +6,10 @@ import {
   signOut, 
   onAuthStateChanged,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  signInWithPopup
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, googleProvider } from '../firebase';
 
 // Types
 interface UserProfile {
@@ -23,6 +24,7 @@ interface AuthContextType {
   isLoading: boolean;
   signup: (email: string, password: string, displayName: string) => Promise<UserProfile>;
   login: (email: string, password: string) => Promise<User>;
+  signInWithGoogle: () => Promise<User>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updateUserProfile: (profile: { displayName?: string, photoURL?: string }) => Promise<void>;
@@ -89,6 +91,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  // Google Sign-in function
+  async function signInWithGoogle(): Promise<User> {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      return result.user;
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+      throw error;
+    }
+  }
+
   // Logout function
   async function logout(): Promise<void> {
     try {
@@ -138,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     signup,
     login,
+    signInWithGoogle,
     logout,
     resetPassword,
     updateUserProfile

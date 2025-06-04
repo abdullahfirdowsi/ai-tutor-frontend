@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getAuth, connectAuthEmulator, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 
 // Firebase configuration - replace with your own config
@@ -21,6 +21,12 @@ const auth = getAuth(app);
 // Initialize Firestore
 const firestore = getFirestore(app);
 
+// Initialize Google Auth Provider
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
 // Connect to emulators in development environment
 if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_USE_FIREBASE_EMULATORS === 'true') {
   // Auth emulator - typically runs on port 9099
@@ -32,5 +38,5 @@ if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_USE_FIREBASE
   console.log('Using Firebase emulators for development');
 }
 
-export { app, auth, firestore };
+export { app, auth, firestore, googleProvider };
 

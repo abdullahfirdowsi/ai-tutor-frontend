@@ -12,11 +12,14 @@ import {
   InputGroup,
   InputRightElement,
   Icon,
+  Divider,
+  Box,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 interface LoginFormData {
   email: string;
@@ -124,6 +127,15 @@ const Login: React.FC = () => {
           >
             Sign in
           </Button>
+          
+          <Box position="relative" padding="10">
+            <Divider />
+            <Text position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)" backgroundColor="white" paddingX="4">
+              or
+            </Text>
+          </Box>
+          
+          <GoogleSignInButton />
           
           <Stack pt={6}>
             <Text align={'center'}>
