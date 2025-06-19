@@ -37,7 +37,7 @@ import {
   FiTarget,
   FiAward,
   FiCalendar,
-  FiBarChart3,
+  FiBarChart,
   FiPieChart,
   FiActivity,
   FiRefreshCw,
@@ -435,7 +435,7 @@ const Analytics: React.FC = () => {
           <Card bg={cardBg} borderRadius="xl" boxShadow="lg">
             <CardHeader>
               <HStack>
-                <Icon as={FiBarChart3} color="brand.500" />
+                <Icon as={FiBarChart} color="brand.500" />
                 <Heading size="md">Difficulty Progress</Heading>
               </HStack>
             </CardHeader>
