@@ -64,6 +64,8 @@ interface UserProgress {
     streak?: number;
     weekly_goal?: number;
     completed_this_week?: number;
+    average_score?: number;
+    total_study_days?: number;
   };
   last_active?: string;
 }
@@ -88,7 +90,7 @@ const Dashboard: React.FC = () => {
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [recommendedLessons, setRecommendedLessons] = useState<RecommendedLesson[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   const cardBg = useColorModeValue('white', 'gray.800');
   const gradientBg = useColorModeValue(
@@ -99,34 +101,64 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
-      setError(null);
+      setHasError(false);
 
       try {
-        // Fetch user progress
-        const progressResponse = await api.get('/users/me/progress');
-        setUserProgress(progressResponse.data);
+        // Fetch user progress - this is the main data we need
+        try {
+          const progressResponse = await api.get('/users/me/progress');
+          setUserProgress(progressResponse.data);
+        } catch (progressError) {
+          console.warn('No progress data available yet:', progressError);
+          // Set empty progress instead of error
+          setUserProgress({
+            completed_lessons: [],
+            total_time_spent: 0,
+            statistics: {
+              questions_asked: 0,
+              streak: 0,
+              weekly_goal: 7,
+              completed_this_week: 0,
+            }
+          });
+        }
 
-        // Fetch recent activity
+        // Fetch recent activity - optional data
         try {
           const activityResponse = await api.get('/users/me/activity?limit=5');
           setRecentActivity(activityResponse.data.activities || []);
         } catch (activityError) {
-          console.warn('Failed to fetch recent activity:', activityError);
+          console.warn('No recent activity available:', activityError);
           setRecentActivity([]);
         }
 
-        // Fetch recommended lessons
+        // Fetch recommended lessons - optional data
         try {
           const recommendedResponse = await api.get('/lessons/recommended?limit=3');
           setRecommendedLessons(recommendedResponse.data.lessons || []);
         } catch (recommendedError) {
-          console.warn('Failed to fetch recommended lessons:', recommendedError);
+          console.warn('No recommended lessons available:', recommendedError);
           setRecommendedLessons([]);
         }
 
       } catch (err: any) {
-        console.error('Error fetching dashboard data:', err);
-        setError('Failed to load dashboard data. Please check your connection and try again.');
+        console.error('Critical error fetching dashboard data:', err);
+        // Only set error for critical failures (like network issues)
+        if (err.code === 'NETWORK_ERROR' || err.response?.status >= 500) {
+          setHasError(true);
+        } else {
+          // For other errors, just show empty state
+          setUserProgress({
+            completed_lessons: [],
+            total_time_spent: 0,
+            statistics: {
+              questions_asked: 0,
+              streak: 0,
+              weekly_goal: 7,
+              completed_this_week: 0,
+            }
+          });
+        }
       } finally {
         setIsLoading(false);
       }
@@ -172,13 +204,15 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (hasError) {
     return (
       <Container maxW="container.xl" py={8}>
         <Alert status="error" borderRadius="lg">
           <AlertIcon />
-          <AlertTitle mr={2}>Dashboard Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertTitle mr={2}>Connection Error</AlertTitle>
+          <AlertDescription>
+            Unable to connect to the server. Please check your internet connection and try again.
+          </AlertDescription>
         </Alert>
         <Button mt={4} onClick={() => window.location.reload()} colorScheme="brand">
           Retry
@@ -236,7 +270,7 @@ const Dashboard: React.FC = () => {
             </VStack>
           </HStack>
           
-          {userProgress?.current_lesson && (
+          {userProgress?.current_lesson ? (
             <Card bg="whiteAlpha.200" backdropFilter="blur(10px)" border="1px solid" borderColor="whiteAlpha.300">
               <CardBody>
                 <HStack justify="space-between" mb={3}>
@@ -265,6 +299,28 @@ const Dashboard: React.FC = () => {
                 <HStack justify="space-between" mt={2} fontSize="sm" opacity={0.9}>
                   <Text>{Math.round(userProgress.current_lesson.progress * 100)}% complete</Text>
                 </HStack>
+              </CardBody>
+            </Card>
+          ) : (
+            <Card bg="whiteAlpha.200" backdropFilter="blur(10px)" border="1px solid" borderColor="whiteAlpha.300">
+              <CardBody textAlign="center">
+                <VStack spacing={3}>
+                  <Icon as={FiBook} boxSize={8} opacity={0.8} />
+                  <VStack spacing={1}>
+                    <Text fontWeight="bold">Ready to start learning?</Text>
+                    <Text fontSize="sm" opacity={0.8}>Browse our lessons to begin your journey</Text>
+                  </VStack>
+                  <Button
+                    leftIcon={<FiBook />}
+                    colorScheme="whiteAlpha"
+                    variant="solid"
+                    size="sm"
+                    as={RouterLink}
+                    to="/lessons"
+                  >
+                    Browse Lessons
+                  </Button>
+                </VStack>
               </CardBody>
             </Card>
           )}
@@ -338,9 +394,25 @@ const Dashboard: React.FC = () => {
                   ))}
                 </VStack>
               ) : (
-                <Text color="gray.500" textAlign="center" py={8}>
-                  No recent activity. Start learning to see your progress here!
-                </Text>
+                <VStack spacing={4} py={8} textAlign="center" color="gray.500">
+                  <Icon as={FiTrendingUp} boxSize={12} />
+                  <VStack spacing={2}>
+                    <Text fontWeight="medium">No recent activity</Text>
+                    <Text fontSize="sm">
+                      Start learning to see your progress here!
+                    </Text>
+                  </VStack>
+                  <Button
+                    leftIcon={<FiBook />}
+                    colorScheme="brand"
+                    variant="outline"
+                    size="sm"
+                    as={RouterLink}
+                    to="/lessons"
+                  >
+                    Browse Lessons
+                  </Button>
+                </VStack>
               )}
             </CardBody>
           </Card>
@@ -401,9 +473,15 @@ const Dashboard: React.FC = () => {
                     ))}
                   </VStack>
                 ) : (
-                  <Text color="gray.500" textAlign="center" py={4}>
-                    Complete more lessons to get personalized recommendations!
-                  </Text>
+                  <VStack spacing={4} py={6} textAlign="center" color="gray.500">
+                    <Icon as={FiBook} boxSize={10} />
+                    <VStack spacing={2}>
+                      <Text fontWeight="medium" fontSize="sm">No recommendations yet</Text>
+                      <Text fontSize="xs">
+                        Complete lessons to get personalized recommendations!
+                      </Text>
+                    </VStack>
+                  </VStack>
                 )}
               </CardBody>
               <CardFooter pt={0}>

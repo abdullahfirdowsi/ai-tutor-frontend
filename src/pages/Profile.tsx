@@ -41,7 +41,9 @@ import {
   FiTrendingUp, 
   FiAward,
   FiCalendar,
-  FiTarget
+  FiTarget,
+  FiWifi,
+  FiRefreshCw
 } from 'react-icons/fi';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
@@ -92,7 +94,7 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [progressData, setProgressData] = useState<LearningProgress | null>(null);
   const [isLoadingProgress, setIsLoadingProgress] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [hasNetworkError, setHasNetworkError] = useState<boolean>(false);
   
   // Form handling
   const {
@@ -115,14 +117,30 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const fetchProgress = async () => {
       setIsLoadingProgress(true);
-      setError(null);
+      setHasNetworkError(false);
       
       try {
         const response = await api.get('/users/me/progress');
         setProgressData(response.data);
       } catch (err: any) {
-        console.error('Error fetching learning progress:', err);
-        setError(err.response?.data?.detail || 'Failed to load learning progress.');
+        console.warn('Failed to fetch learning progress:', err);
+        
+        // Only show network error for critical failures
+        if (err.code === 'NETWORK_ERROR' || !err.response || err.response?.status >= 500) {
+          setHasNetworkError(true);
+        } else {
+          // For other errors, show empty progress state
+          setProgressData({
+            completed_lessons: [],
+            total_time_spent: 0,
+            statistics: {
+              questions_asked: 0,
+              streak: 0,
+              weekly_goal: 7,
+              completed_this_week: 0,
+            }
+          });
+        }
       } finally {
         setIsLoadingProgress(false);
       }
@@ -334,11 +352,24 @@ const Profile: React.FC = () => {
                       <Skeleton key={i} height="100px" borderRadius="lg" />
                     ))}
                   </SimpleGrid>
-                ) : error ? (
-                  <Alert status="error" borderRadius="lg">
-                    <AlertIcon />
-                    {error}
-                  </Alert>
+                ) : hasNetworkError ? (
+                  <VStack spacing={6} textAlign="center" py={8}>
+                    <Icon as={FiWifi} boxSize={12} color="red.400" />
+                    <VStack spacing={2}>
+                      <Text fontWeight="medium" color="red.500">Connection Problem</Text>
+                      <Text fontSize="sm" color="gray.600">
+                        Unable to load your learning statistics
+                      </Text>
+                    </VStack>
+                    <Button 
+                      leftIcon={<FiRefreshCw />}
+                      size="sm"
+                      colorScheme="brand"
+                      onClick={() => window.location.reload()}
+                    >
+                      Try Again
+                    </Button>
+                  </VStack>
                 ) : progressData ? (
                   <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6}>
                     <Card bg={statBg} borderRadius="lg">
@@ -398,15 +429,30 @@ const Profile: React.FC = () => {
                     </Card>
                   </SimpleGrid>
                 ) : (
-                  <Text color="gray.500" textAlign="center" py={8}>
-                    No learning data available yet. Start taking lessons to see your progress!
-                  </Text>
+                  <VStack spacing={6} textAlign="center" py={8} color="gray.500">
+                    <Icon as={FiBook} boxSize={12} />
+                    <VStack spacing={2}>
+                      <Text fontWeight="medium">No learning data yet</Text>
+                      <Text fontSize="sm">
+                        Start taking lessons to see your progress here!
+                      </Text>
+                    </VStack>
+                    <Button
+                      leftIcon={<FiBook />}
+                      colorScheme="brand"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.location.href = '/lessons'}
+                    >
+                      Browse Lessons
+                    </Button>
+                  </VStack>
                 )}
               </CardBody>
             </Card>
 
             {/* Weekly Goal Progress */}
-            {progressData && (
+            {progressData && !hasNetworkError && (
               <Card bg={cardBg} boxShadow="lg" borderRadius="xl">
                 <CardHeader>
                   <HStack justify="space-between">
@@ -448,7 +494,7 @@ const Profile: React.FC = () => {
             )}
 
             {/* Recent Activity */}
-            {progressData?.completed_lessons && progressData.completed_lessons.length > 0 && (
+            {progressData?.completed_lessons && progressData.completed_lessons.length > 0 && !hasNetworkError && (
               <Card bg={cardBg} boxShadow="lg" borderRadius="xl">
                 <CardHeader>
                   <HStack justify="space-between">

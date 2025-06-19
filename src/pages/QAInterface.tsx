@@ -31,6 +31,7 @@ import {
   FormLabel,
   Input,
   useBreakpointValue,
+  Icon,
 } from '@chakra-ui/react';
 import { 
   FiMessageSquare, 
@@ -38,7 +39,9 @@ import {
   FiChevronUp, 
   FiClock, 
   FiPlus,
-  FiSidebar
+  FiSidebar,
+  FiWifi,
+  FiRefreshCw
 } from 'react-icons/fi';
 import api from '../services/api';
 
@@ -75,7 +78,7 @@ const QAInterface: React.FC = () => {
   const [messages, setMessages] = useState<QAMessage[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingSessions, setIsLoadingSessions] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [hasNetworkError, setHasNetworkError] = useState<boolean>(false);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   
   // New session form
@@ -94,22 +97,28 @@ const QAInterface: React.FC = () => {
   // Fetch sessions
   const fetchSessions = useCallback(async () => {
     setIsLoadingSessions(true);
-    setError(null);
+    setHasNetworkError(false);
     
     try {
       const response = await api.get<QASessionsResponse>('/qa/sessions');
-      setSessions(response.data.sessions);
+      setSessions(response.data.sessions || []);
       
       // Auto-select the most recent session if none is selected
-      if (!activeSession && response.data.sessions.length > 0) {
+      if (!activeSession && response.data.sessions && response.data.sessions.length > 0) {
         const mostRecent = response.data.sessions[0];
         setActiveSession(mostRecent);
         setMessages(mostRecent.messages || []);
       }
     } catch (err: any) {
-      console.error('Error fetching sessions:', err);
-      setError('Failed to load conversations. Please check your connection and try again.');
-      setSessions([]);
+      console.warn('Failed to fetch sessions:', err);
+      
+      // Only show network error for critical failures
+      if (err.code === 'NETWORK_ERROR' || !err.response || err.response?.status >= 500) {
+        setHasNetworkError(true);
+      } else {
+        // For other errors, just show empty state
+        setSessions([]);
+      }
     } finally {
       setIsLoadingSessions(false);
     }
@@ -170,7 +179,6 @@ const QAInterface: React.FC = () => {
   // Handle question submission with optimistic updates
   const handleQuestionSubmit = async (question: string, context?: string) => {
     setIsLoading(true);
-    setError(null);
     
     try {
       let currentSession = activeSession;
@@ -229,14 +237,13 @@ const QAInterface: React.FC = () => {
       
     } catch (err: any) {
       console.error('Error submitting question:', err);
-      setError('Failed to process your question. Please try again.');
       
       // Remove optimistic message on error
       setMessages(prev => prev.filter(msg => !msg.id.startsWith('temp-')));
       
       toast({
-        title: 'Error',
-        description: 'Failed to process your question. Please check your connection and try again.',
+        title: 'Unable to process question',
+        description: 'Please check your connection and try again.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -250,7 +257,6 @@ const QAInterface: React.FC = () => {
   const handleSessionSelect = (session: QASession) => {
     setActiveSession(session);
     setMessages(session.messages || []);
-    setError(null);
     
     if (isMobile) {
       toggleHistory();
@@ -336,6 +342,39 @@ const QAInterface: React.FC = () => {
       });
     }
   };
+
+  // Show network error only for critical failures
+  if (hasNetworkError) {
+    return (
+      <Container maxW="container.xl" py={8}>
+        <VStack spacing={8} textAlign="center">
+          <Icon as={FiWifi} boxSize={16} color="red.400" />
+          <VStack spacing={4}>
+            <Heading size="lg" color="red.500">Connection Problem</Heading>
+            <Text color="gray.600" maxW="md">
+              We're having trouble connecting to our servers. Please check your internet connection and try again.
+            </Text>
+          </VStack>
+          <HStack spacing={4}>
+            <Button 
+              leftIcon={<FiRefreshCw />}
+              onClick={fetchSessions} 
+              colorScheme="brand"
+            >
+              Try Again
+            </Button>
+            <Button 
+              leftIcon={<FiPlus />}
+              onClick={openNewSession}
+              variant="outline"
+            >
+              Start Offline Session
+            </Button>
+          </HStack>
+        </VStack>
+      </Container>
+    );
+  }
   
   return (
     <Container maxW="container.xl" py={6}>
@@ -463,14 +502,6 @@ const QAInterface: React.FC = () => {
                           timestamp={message.created_at}
                         />
                       ))
-                    )}
-                    
-                    {/* Error message */}
-                    {error && (
-                      <Alert status="error" borderRadius="lg">
-                        <AlertIcon />
-                        {error}
-                      </Alert>
                     )}
                     
                     {/* Loading indicator */}

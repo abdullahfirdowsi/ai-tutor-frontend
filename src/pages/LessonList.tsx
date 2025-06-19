@@ -35,7 +35,7 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@chakra-ui/react';
-import { FiPlus, FiSearch, FiBook } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiBook, FiWifi, FiRefreshCw } from 'react-icons/fi';
 import { useForm } from 'react-hook-form';
 import api from '../services/api';
 import EmptyState from '../components/common/EmptyState';
@@ -88,7 +88,7 @@ const LessonList: React.FC = () => {
   const [subjectFilter, setSubjectFilter] = useState<string>('');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [hasNetworkError, setHasNetworkError] = useState<boolean>(false);
   
   // Form handling for lesson generation
   const {
@@ -101,7 +101,7 @@ const LessonList: React.FC = () => {
   // Fetch lessons function
   const fetchLessons = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
+    setHasNetworkError(false);
     
     try {
       // Build query params
@@ -110,11 +110,17 @@ const LessonList: React.FC = () => {
       if (difficultyFilter) queryParams += `&difficulty=${encodeURIComponent(difficultyFilter)}`;
       
       const response = await api.get<LessonListResponse>(`/lessons${queryParams}`);
-      setLessons(response.data.lessons);
+      setLessons(response.data.lessons || []);
     } catch (err: any) {
-      console.error('Error fetching lessons:', err);
-      setError('Failed to load lessons. Please check your connection and try again.');
-      setLessons([]);
+      console.warn('Failed to fetch lessons:', err);
+      
+      // Only show network error for critical failures
+      if (err.code === 'NETWORK_ERROR' || !err.response || err.response?.status >= 500) {
+        setHasNetworkError(true);
+      } else {
+        // For other errors (like 404, 401), just show empty state
+        setLessons([]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -169,17 +175,35 @@ const LessonList: React.FC = () => {
   // Extract unique subjects for filter dropdown
   const subjects = Array.from(new Set(lessons.map(lesson => lesson.subject)));
   
-  if (error) {
+  // Show network error only for critical failures
+  if (hasNetworkError) {
     return (
       <Container maxW="container.xl" py={8}>
-        <Alert status="error" mb={8} borderRadius="lg">
-          <AlertIcon />
-          <AlertTitle mr={2}>Error Loading Lessons</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-        <Button onClick={fetchLessons} colorScheme="brand">
-          Retry
-        </Button>
+        <VStack spacing={8} textAlign="center">
+          <Icon as={FiWifi} boxSize={16} color="red.400" />
+          <VStack spacing={4}>
+            <Heading size="lg" color="red.500">Connection Problem</Heading>
+            <Text color="gray.600" maxW="md">
+              We're having trouble connecting to our servers. Please check your internet connection and try again.
+            </Text>
+          </VStack>
+          <HStack spacing={4}>
+            <Button 
+              leftIcon={<FiRefreshCw />}
+              onClick={fetchLessons} 
+              colorScheme="brand"
+            >
+              Try Again
+            </Button>
+            <Button 
+              leftIcon={<FiPlus />}
+              onClick={onOpen}
+              variant="outline"
+            >
+              Generate Lesson Offline
+            </Button>
+          </HStack>
+        </VStack>
       </Container>
     );
   }
@@ -311,16 +335,22 @@ const LessonList: React.FC = () => {
             />
           ))}
         </SimpleGrid>
-      ) : (
+      ) : lessons.length === 0 ? (
+        // No lessons at all
         <EmptyState
           icon={FiBook}
-          title="No lessons found"
-          description={
-            lessons.length === 0 
-              ? "No lessons available yet. Create your first lesson to get started."
-              : "Try adjusting your search criteria or create a new lesson."
-          }
-          actionLabel="Generate Lesson"
+          title="No lessons available"
+          description="Get started by creating your first AI-generated lesson tailored to your learning needs."
+          actionLabel="Generate Your First Lesson"
+          onAction={onOpen}
+        />
+      ) : (
+        // Lessons exist but filtered results are empty
+        <EmptyState
+          icon={FiSearch}
+          title="No lessons match your search"
+          description="Try adjusting your search criteria or create a new lesson with the topic you're looking for."
+          actionLabel="Generate New Lesson"
           onAction={onOpen}
         />
       )}
