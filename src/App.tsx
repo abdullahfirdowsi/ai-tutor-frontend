@@ -17,32 +17,35 @@ import NotFound from './pages/NotFound';
 import MainLayout from './components/layouts/MainLayout';
 import AuthLayout from './components/layouts/AuthLayout';
 import ProtectedRoute from './components/routing/ProtectedRoute';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 function App() {
   return (
-    <Box className="App">
-      <Routes>
-        {/* Auth routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Route>
-
-        {/* Protected routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/lessons" element={<LessonList />} />
-            <Route path="/lessons/:lessonId" element={<Lesson />} />
-            <Route path="/qa" element={<QAInterface />} />
-            <Route path="/profile" element={<Profile />} />
+    <ErrorBoundary>
+      <Box className="App">
+        <Routes>
+          {/* Auth routes */}
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
           </Route>
-        </Route>
 
-        {/* Catch-all route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Box>
+          {/* Protected routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/lessons" element={<LessonList />} />
+              <Route path="/lessons/:lessonId" element={<Lesson />} />
+              <Route path="/qa" element={<QAInterface />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+          </Route>
+
+          {/* Catch-all route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Box>
+    </ErrorBoundary>
   );
 }
 

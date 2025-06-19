@@ -14,16 +14,21 @@ import {
   Icon,
   Divider,
   Box,
+  Heading,
+  VStack,
+  HStack,
+  Checkbox,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiMail, FiLock } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
 interface LoginFormData {
   email: string;
   password: string;
+  rememberMe: boolean;
 }
 
 const Login: React.FC = () => {
@@ -45,7 +50,8 @@ const Login: React.FC = () => {
       await login(data.email, data.password);
       navigate('/');
       toast({
-        title: 'Login successful',
+        title: 'Welcome back!',
+        description: 'You have successfully signed in.',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -53,8 +59,8 @@ const Login: React.FC = () => {
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
-        title: 'Login failed',
-        description: error.message || 'An error occurred during login',
+        title: 'Sign in failed',
+        description: error.message || 'Please check your credentials and try again.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -65,91 +71,124 @@ const Login: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={4}>
-        <FormControl id="email" isInvalid={!!errors.email}>
-          <FormLabel>Email address</FormLabel>
-          <Input
-            type="email"
-            {...register('email', {
-              required: 'Email is required',
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: 'Invalid email address',
-              },
-            })}
-          />
-          <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
-        </FormControl>
-        
-        <FormControl id="password" isInvalid={!!errors.password}>
-          <FormLabel>Password</FormLabel>
-          <InputGroup>
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              {...register('password', {
-                required: 'Password is required',
-                minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
-                },
-              })}
-            />
-            <InputRightElement h="full">
-              <Button
-                variant="ghost"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                <Icon as={showPassword ? FiEyeOff : FiEye} />
-              </Button>
-            </InputRightElement>
-          </InputGroup>
-          <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
-        </FormControl>
-        
-        <Stack spacing={10}>
-          <Stack
-            direction={{ base: 'column', sm: 'row' }}
-            align={'start'}
-            justify={'space-between'}
-          >
-            <Link color={'blue.400'}>Forgot password?</Link>
-          </Stack>
+    <VStack spacing={8} align="stretch">
+      {/* Header */}
+      <VStack spacing={2} textAlign="center">
+        <Heading size="lg">Welcome back</Heading>
+        <Text color="gray.600">
+          Sign in to continue your learning journey
+        </Text>
+      </VStack>
+
+      {/* Google Sign In */}
+      <GoogleSignInButton text="Continue with Google" />
+
+      {/* Divider */}
+      <HStack>
+        <Divider />
+        <Text fontSize="sm" color="gray.500" px={3}>
+          or
+        </Text>
+        <Divider />
+      </HStack>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <VStack spacing={6}>
+          <FormControl id="email" isInvalid={!!errors.email}>
+            <FormLabel>Email address</FormLabel>
+            <InputGroup>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                size="lg"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /\S+@\S+\.\S+/,
+                    message: 'Please enter a valid email address',
+                  },
+                })}
+              />
+              <InputRightElement h="full" pointerEvents="none">
+                <Icon as={FiMail} color="gray.400" />
+              </InputRightElement>
+            </InputGroup>
+            <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
+          </FormControl>
+          
+          <FormControl id="password" isInvalid={!!errors.password}>
+            <FormLabel>Password</FormLabel>
+            <InputGroup>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                size="lg"
+                {...register('password', {
+                  required: 'Password is required',
+                  minLength: {
+                    value: 6,
+                    message: 'Password must be at least 6 characters',
+                  },
+                })}
+              />
+              <InputRightElement h="full">
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  <Icon as={showPassword ? FiEyeOff : FiEye} color="gray.400" />
+                </Button>
+              </InputRightElement>
+            </InputGroup>
+            <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
+          </FormControl>
+
+          {/* Remember me and forgot password */}
+          <HStack justify="space-between" w="full">
+            <Checkbox {...register('rememberMe')} colorScheme="brand">
+              <Text fontSize="sm">Remember me</Text>
+            </Checkbox>
+            <Link
+              as={RouterLink}
+              to="/forgot-password"
+              fontSize="sm"
+              color="brand.500"
+              _hover={{ color: 'brand.600' }}
+            >
+              Forgot password?
+            </Link>
+          </HStack>
           
           <Button
-            bg={'brand.500'}
-            color={'white'}
-            _hover={{
-              bg: 'brand.600',
-            }}
             type="submit"
+            colorScheme="brand"
+            size="lg"
+            w="full"
             isLoading={isLoading}
+            loadingText="Signing in..."
           >
-            Sign in
+            Sign In
           </Button>
-          
-          <Box position="relative" padding="10">
-            <Divider />
-            <Text position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)" backgroundColor="white" paddingX="4">
-              or
-            </Text>
-          </Box>
-          
-          <GoogleSignInButton />
-          
-          <Stack pt={6}>
-            <Text align={'center'}>
-              Don't have an account?{' '}
-              <Link as={RouterLink} to="/signup" color={'blue.400'}>
-                Sign up
-              </Link>
-            </Text>
-          </Stack>
-        </Stack>
-      </Stack>
-    </form>
+        </VStack>
+      </form>
+
+      {/* Sign up link */}
+      <Text textAlign="center" fontSize="sm">
+        Don't have an account?{' '}
+        <Link
+          as={RouterLink}
+          to="/signup"
+          color="brand.500"
+          fontWeight="semibold"
+          _hover={{ color: 'brand.600' }}
+        >
+          Create one now
+        </Link>
+      </Text>
+    </VStack>
   );
 };
 
 export default Login;
-
