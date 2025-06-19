@@ -3,7 +3,7 @@ import { auth } from '../firebase';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1',
+  baseURL: process.env.REACT_APP_API_URL || 'https://ai-tutor-backend-bjbg.onrender.com/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
