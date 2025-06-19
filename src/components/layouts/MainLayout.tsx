@@ -10,7 +10,7 @@ const MainLayout: React.FC = () => {
       <Navbar />
       <Flex>
         <Sidebar />
-        <Box flex="1" p={4} ml={{ base: 0, md: '240px' }}>
+        <Box flex="1" p={4} ml={{ base: 0, md: '280px' }}>
           <Outlet />
         </Box>
       </Flex>
@@ -19,4 +19,3 @@ const MainLayout: React.FC = () => {
 };
 
 export default MainLayout;
-

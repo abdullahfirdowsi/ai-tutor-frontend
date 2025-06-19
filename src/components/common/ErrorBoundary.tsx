@@ -9,7 +9,6 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  useColorModeValue,
 } from '@chakra-ui/react';
 
 interface Props {
