@@ -96,16 +96,7 @@ const QAInterface: React.FC = () => {
     }
   }, [location]);
   
-  // Fetch QA history
-  useEffect(() => {
-    fetchQAHistory();
-  }, []);
-  
-  // Scroll to bottom of conversation when new items are added
-  useEffect(() => {
-    scrollToBottom();
-  }, [qaItems]);
-  
+  // Fetch QA history function
   const fetchQAHistory = useCallback(async () => {
     setIsLoadingHistory(true);
     setError(null);
@@ -133,6 +124,16 @@ const QAInterface: React.FC = () => {
       setIsLoadingHistory(false);
     }
   }, [toast]);
+  
+  // Fetch QA history
+  useEffect(() => {
+    fetchQAHistory();
+  }, [fetchQAHistory]);
+  
+  // Scroll to bottom of conversation when new items are added
+  useEffect(() => {
+    scrollToBottom();
+  }, [qaItems]);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

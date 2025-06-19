@@ -4,7 +4,6 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Stack,
   Link,
   Text,
   useToast,
@@ -13,7 +12,6 @@ import {
   InputRightElement,
   Icon,
   Divider,
-  Box,
   Heading,
   VStack,
   HStack,
@@ -21,7 +19,7 @@ import {
 } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { FiEye, FiEyeOff, FiMail, FiLock } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiMail } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 

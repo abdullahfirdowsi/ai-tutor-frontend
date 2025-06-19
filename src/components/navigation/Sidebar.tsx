@@ -3,7 +3,6 @@ import {
   Box,
   Flex,
   Icon,
-  Stack,
   useColorModeValue,
   Text,
   VStack,
@@ -33,7 +32,6 @@ interface NavItemProps {
 
 const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps) => {
   // Move all hooks to the top
-  const bg = useColorModeValue('white', 'gray.800');
   const activeBg = useColorModeValue('brand.50', 'brand.900');
   const activeColor = useColorModeValue('brand.600', 'brand.300');
   const textColor = useColorModeValue('gray.600', 'gray.300');
@@ -116,7 +114,7 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   
   // Move all hooks to the top
-  const bg = useColorModeValue('white', 'gray.800');
+  const sidebarBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const labelColor = useColorModeValue('gray.500', 'gray.400');
   const progressBg = useColorModeValue('brand.50', 'brand.900');
@@ -137,7 +135,7 @@ const Sidebar: React.FC = () => {
       height="calc(100vh - 72px)"
       w={{ base: 'full', md: '280px' }}
       display={{ base: 'none', md: 'block' }}
-      bg={bg}
+      bg={sidebarBg}
       borderRight="1px"
       borderRightColor={borderColor}
       pt={6}
@@ -159,7 +157,7 @@ const Sidebar: React.FC = () => {
           >
             Main
           </Text>
-          <Stack spacing={1} align="stretch">
+          <VStack spacing={1} align="stretch">
             <NavItem 
               icon={FiHome} 
               to="/" 
@@ -188,7 +186,7 @@ const Sidebar: React.FC = () => {
             >
               Q&A Assistant
             </NavItem>
-          </Stack>
+          </VStack>
         </Box>
 
         <Divider />
@@ -206,7 +204,7 @@ const Sidebar: React.FC = () => {
           >
             Learning Tools
           </Text>
-          <Stack spacing={1} align="stretch">
+          <VStack spacing={1} align="stretch">
             <NavItem 
               icon={FiTrendingUp} 
               to="/analytics" 
@@ -225,7 +223,7 @@ const Sidebar: React.FC = () => {
             >
               Bookmarks
             </NavItem>
-          </Stack>
+          </VStack>
         </Box>
 
         <Divider />
@@ -243,7 +241,7 @@ const Sidebar: React.FC = () => {
           >
             Account
           </Text>
-          <Stack spacing={1} align="stretch">
+          <VStack spacing={1} align="stretch">
             <NavItem 
               icon={FiUser} 
               to="/profile" 
@@ -261,7 +259,7 @@ const Sidebar: React.FC = () => {
             >
               Settings
             </NavItem>
-          </Stack>
+          </VStack>
         </Box>
 
         {/* Progress Summary */}

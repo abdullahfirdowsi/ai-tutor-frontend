@@ -2,14 +2,12 @@ import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { 
   Box, 
-  Center, 
   Flex, 
   Heading, 
   Text,
   VStack,
   useColorModeValue,
   Container,
-  Stack,
   HStack,
   Icon,
 } from '@chakra-ui/react';
@@ -27,7 +25,6 @@ const AuthLayout: React.FC = () => {
   const cardBg = useColorModeValue('white', 'gray.800');
   const headingColor = useColorModeValue('gray.800', 'white');
   const textColor = useColorModeValue('gray.600', 'gray.300');
-  const featureBg = useColorModeValue('white', 'gray.800');
   const featureIconBg = useColorModeValue('brand.100', 'brand.900');
   const featureTitleColor = useColorModeValue('gray.800', 'white');
   const featureDescColor = useColorModeValue('gray.600', 'gray.300');

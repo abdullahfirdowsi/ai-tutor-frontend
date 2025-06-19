@@ -4,7 +4,6 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Stack,
   Link,
   Text,
   useToast,
@@ -13,7 +12,6 @@ import {
   InputRightElement,
   Icon,
   Divider,
-  Box,
   Heading,
   VStack,
   HStack,
@@ -22,7 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { FiEye, FiEyeOff, FiMail, FiLock, FiUser, FiCheck } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiMail, FiUser } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
@@ -208,7 +206,7 @@ const Signup: React.FC = () => {
             
             {/* Password strength indicator */}
             {watchPassword && (
-              <Box mt={2}>
+              <VStack mt={2} align="stretch">
                 <HStack justify="space-between" mb={1}>
                   <Text fontSize="xs" color="gray.500">Password strength</Text>
                   <Text fontSize="xs" color={`${getPasswordStrengthColor(passwordStrength)}.500`}>
@@ -221,7 +219,7 @@ const Signup: React.FC = () => {
                   size="sm"
                   borderRadius="full"
                 />
-              </Box>
+              </VStack>
             )}
             
             <FormErrorMessage>{errors.password?.message}</FormErrorMessage>

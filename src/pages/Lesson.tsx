@@ -100,6 +100,56 @@ const Lesson: React.FC = () => {
   const [exerciseAnswers, setExerciseAnswers] = useState<Record<number, string>>({});
   const [exerciseScore, setExerciseScore] = useState<number | null>(null);
   
+  // Save progress function
+  const saveProgress = useCallback(async (isAutoSave: boolean = false) => {
+    if (!lessonId || !lesson) return;
+    
+    try {
+      const timeSpent = lessonProgress.time_spent + Math.floor((Date.now() - startTime) / 1000);
+      
+      // Calculate progress percentage based on current section
+      const progressPercentage = lesson.content.length > 0 
+        ? (currentSectionIndex + 1) / lesson.content.length 
+        : 0;
+      
+      const progressData: LessonProgress = {
+        progress: progressPercentage,
+        time_spent: timeSpent,
+        completed: lessonProgress.completed,
+        last_position: currentSectionIndex.toString(),
+        score: exerciseScore === null ? undefined : exerciseScore,
+      };
+      
+      await api.post(`/lessons/${lessonId}/progress`, progressData);
+      
+      // Reset start time
+      setStartTime(Date.now());
+      
+      // Update local progress state
+      setLessonProgress(progressData);
+      
+      if (!isAutoSave) {
+        toast({
+          title: 'Progress saved',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (err: any) {
+      console.error('Error saving progress:', err);
+      if (!isAutoSave) {
+        toast({
+          title: 'Failed to save progress',
+          description: err.response?.data?.detail || 'Please try again.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    }
+  }, [lessonId, lesson, lessonProgress, currentSectionIndex, exerciseScore, startTime, toast]);
+  
   // Fetch lesson data
   useEffect(() => {
     const fetchLesson = async () => {
@@ -160,57 +210,7 @@ const Lesson: React.FC = () => {
       clearInterval(timer);
       saveProgress(true);
     };
-  }, [lessonId]);
-  
-  // Save progress
-  const saveProgress = useCallback(async (isAutoSave: boolean = false) => {
-    if (!lessonId || !lesson) return;
-    
-    try {
-      const timeSpent = lessonProgress.time_spent + Math.floor((Date.now() - startTime) / 1000);
-      
-      // Calculate progress percentage based on current section
-      const progressPercentage = lesson.content.length > 0 
-        ? (currentSectionIndex + 1) / lesson.content.length 
-        : 0;
-      
-      const progressData: LessonProgress = {
-        progress: progressPercentage,
-        time_spent: timeSpent,
-        completed: lessonProgress.completed,
-        last_position: currentSectionIndex.toString(),
-        score: exerciseScore === null ? undefined : exerciseScore,
-      };
-      
-      await api.post(`/lessons/${lessonId}/progress`, progressData);
-      
-      // Reset start time
-      setStartTime(Date.now());
-      
-      // Update local progress state
-      setLessonProgress(progressData);
-      
-      if (!isAutoSave) {
-        toast({
-          title: 'Progress saved',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    } catch (err: any) {
-      console.error('Error saving progress:', err);
-      if (!isAutoSave) {
-        toast({
-          title: 'Failed to save progress',
-          description: err.response?.data?.detail || 'Please try again.',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    }
-  }, [lessonId, lesson, lessonProgress, currentSectionIndex, exerciseScore, startTime, toast]);
+  }, [lessonId, saveProgress]);
   
   // Mark lesson as complete
   const completeLesson = async () => {
@@ -488,4 +488,3 @@ const Lesson: React.FC = () => {
 };
 
 export default Lesson;
-

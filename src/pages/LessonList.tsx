@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box,
   Button,
   Container,
   Flex,
@@ -37,10 +36,9 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@chakra-ui/react';
-import { FiPlus, FiSearch, FiFilter, FiBook, FiClock, FiCalendar } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiBook } from 'react-icons/fi';
 import { useForm } from 'react-hook-form';
 import api from '../services/api';
-import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
 
 // Import components
@@ -118,7 +116,6 @@ const LessonList: React.FC = () => {
   
   // Move all hooks to the top
   const cardBg = useColorModeValue('white', 'gray.800');
-  const filterBg = useColorModeValue('gray.50', 'gray.700');
   const headingColor = useColorModeValue('gray.600', 'gray.400');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   
@@ -130,7 +127,6 @@ const LessonList: React.FC = () => {
   const [subjectFilter, setSubjectFilter] = useState<string>('');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   
   // Form handling for lesson generation
   const {
@@ -140,14 +136,9 @@ const LessonList: React.FC = () => {
     reset,
   } = useForm<LessonGenerateRequest>();
   
-  // Fetch lessons
-  useEffect(() => {
-    fetchLessons();
-  }, [subjectFilter, difficultyFilter]);
-  
+  // Fetch lessons function
   const fetchLessons = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
     
     try {
       // Build query params
@@ -177,6 +168,11 @@ const LessonList: React.FC = () => {
       setIsLoading(false);
     }
   }, [subjectFilter, difficultyFilter, toast]);
+  
+  // Fetch lessons
+  useEffect(() => {
+    fetchLessons();
+  }, [fetchLessons]);
   
   // Generate a new lesson
   const generateLesson = async (data: LessonGenerateRequest) => {
