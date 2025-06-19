@@ -20,6 +20,8 @@ import {
   Flex,
   Icon,
   useColorModeValue,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import { FiBook, FiClock, FiAward, FiHelpCircle } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
@@ -51,6 +53,15 @@ const Dashboard: React.FC = () => {
   return (
     <Box maxW="1200px" mx="auto" px={4}>
       <Heading mb={8}>Welcome, {currentUser?.displayName || 'Student'}!</Heading>
+      
+      {/* Demo mode notice */}
+      <Alert status="info" mb={6} borderRadius="md">
+        <AlertIcon />
+        <Text>
+          <strong>Demo Mode:</strong> This is a demonstration of the AI Tutor interface. 
+          Backend API connectivity is limited, so some features show simulated data.
+        </Text>
+      </Alert>
       
       <Grid templateColumns={{ base: 'repeat(1, 1fr)', md: 'repeat(3, 1fr)' }} gap={6} mb={8}>
         <GridItem>
@@ -122,11 +133,11 @@ const Dashboard: React.FC = () => {
             <CardFooter>
               <Button 
                 as={RouterLink} 
-                to={`/lessons/${userProgress.currentLesson.id}`}
+                to="/lessons"
                 colorScheme="brand" 
                 width="full"
               >
-                Continue Lesson
+                Browse Lessons
               </Button>
             </CardFooter>
           </Card>
@@ -155,27 +166,27 @@ const Dashboard: React.FC = () => {
         <GridItem>
           <Card bg={cardBg}>
             <CardHeader>
-              <Heading size="md">Recommended Lessons</Heading>
+              <Heading size="md">Demo Lessons Available</Heading>
             </CardHeader>
             <CardBody>
               <Stack spacing={4} divider={<Divider />}>
                 <RecommendedLesson 
-                  id="lesson-456"
-                  title="Python Programming Fundamentals" 
-                  description="Learn the basics of Python programming language"
+                  id="mock-1"
+                  title="Introduction to Machine Learning" 
+                  description="Learn the fundamentals of machine learning and its applications"
                   difficulty="Beginner"
                 />
                 <RecommendedLesson 
-                  id="lesson-789"
-                  title="Introduction to Data Science" 
-                  description="Explore the world of data science and analytics"
+                  id="mock-2"
+                  title="Linear Algebra Basics" 
+                  description="Understanding vectors, matrices, and linear transformations"
                   difficulty="Intermediate"
                 />
                 <RecommendedLesson 
-                  id="lesson-101"
-                  title="Web Development with React" 
-                  description="Build modern web applications with React"
-                  difficulty="Intermediate"
+                  id="mock-3"
+                  title="React Fundamentals" 
+                  description="Build modern web applications with React components and hooks"
+                  difficulty="Beginner"
                 />
               </Stack>
             </CardBody>
@@ -215,16 +226,15 @@ const RecommendedLesson: React.FC<RecommendedLessonProps> = ({ id, title, descri
       <Text fontSize="sm" color="gray.500" mb={2}>{description}</Text>
       <Button 
         as={RouterLink} 
-        to={`/lessons/${id}`} 
+        to="/lessons" 
         size="sm" 
         colorScheme="brand"
         variant="outline"
       >
-        Start Lesson
+        View Lessons
       </Button>
     </Box>
   );
 };
 
 export default Dashboard;
-
