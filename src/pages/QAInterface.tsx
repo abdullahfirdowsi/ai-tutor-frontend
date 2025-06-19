@@ -22,7 +22,7 @@ import {
   CardHeader,
   CardBody,
 } from '@chakra-ui/react';
-import { FiMessageSquare, FiChevronDown, FiChevronUp, FiHistory } from 'react-icons/fi';
+import { FiMessageSquare, FiChevronDown, FiChevronUp, FiClock } from 'react-icons/fi';
 import api from '../services/api';
 
 // Import components
@@ -195,7 +195,7 @@ const QAInterface: React.FC = () => {
                     {/* Mobile history toggle */}
                     <IconButton
                       aria-label="Toggle history"
-                      icon={<FiHistory />}
+                      icon={<FiClock />}
                       size="sm"
                       variant="outline"
                       onClick={toggleHistory}
@@ -293,7 +293,7 @@ const QAInterface: React.FC = () => {
               <CardHeader>
                 <HStack justify="space-between">
                   <HStack>
-                    <FiHistory />
+                    <FiClock />
                     <Heading as="h2" size="md">Question History</Heading>
                   </HStack>
                   <Badge variant="subtle" colorScheme="gray">
@@ -327,7 +327,7 @@ const QAInterface: React.FC = () => {
                     </VStack>
                   ) : (
                     <Box textAlign="center" py={12} color="gray.500">
-                      <FiHistory size={32} style={{ margin: '0 auto 16px' }} />
+                      <FiClock size={32} style={{ margin: '0 auto 16px' }} />
                       <Text fontWeight="medium">No questions yet</Text>
                       <Text fontSize="sm" mt={1}>
                         Start asking to build your history
@@ -346,7 +346,7 @@ const QAInterface: React.FC = () => {
             <CardHeader>
               <HStack justify="space-between">
                 <HStack>
-                  <FiHistory />
+                  <FiClock />
                   <Heading as="h2" size="md">Question History</Heading>
                 </HStack>
                 <IconButton
