@@ -97,7 +97,32 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({
   
   return (
     <VStack spacing={4} align="stretch">
-      {/* AI response - LEFT SIDE */}
+      {/* User question FIRST (bottom chronologically) - RIGHT SIDE */}
+      <Flex direction="row" justify="flex-end">
+        <Box
+          bg={userBg}
+          color="white"
+          p={4}
+          borderRadius="lg"
+          borderTopRightRadius="0"
+          maxW="80%"
+          boxShadow="sm"
+        >
+          <Text fontWeight="medium">{question}</Text>
+          <HStack mt={2} fontSize="xs" color="whiteAlpha.800" justify="flex-end">
+            <FiClock />
+            <Text>{formatTimestamp(timestamp)}</Text>
+          </HStack>
+        </Box>
+        <Avatar 
+          size="sm" 
+          bg="blue.500" 
+          icon={<FiUser fontSize="1.2rem" />} 
+          ml={3} 
+        />
+      </Flex>
+      
+      {/* AI response SECOND (top chronologically) - LEFT SIDE */}
       <Flex direction="row" justify="flex-start">
         <Avatar
           size="sm"
@@ -146,31 +171,6 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({
             <Text>{formatTimestamp(timestamp)}</Text>
           </HStack>
         </Box>
-      </Flex>
-      
-      {/* User question - RIGHT SIDE */}
-      <Flex direction="row" justify="flex-end">
-        <Box
-          bg={userBg}
-          color="white"
-          p={4}
-          borderRadius="lg"
-          borderTopRightRadius="0"
-          maxW="80%"
-          boxShadow="sm"
-        >
-          <Text fontWeight="medium">{question}</Text>
-          <HStack mt={2} fontSize="xs" color="whiteAlpha.800" justify="flex-end">
-            <FiClock />
-            <Text>{formatTimestamp(timestamp)}</Text>
-          </HStack>
-        </Box>
-        <Avatar 
-          size="sm" 
-          bg="blue.500" 
-          icon={<FiUser fontSize="1.2rem" />} 
-          ml={3} 
-        />
       </Flex>
     </VStack>
   );
