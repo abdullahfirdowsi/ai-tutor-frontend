@@ -10,12 +10,9 @@ import {
   HStack,
   useColorModeValue,
   Button,
-  Alert,
-  AlertIcon,
   Skeleton,
   useToast,
   IconButton,
-  Collapse,
   useDisclosure,
   Card,
   CardHeader,
@@ -35,8 +32,6 @@ import {
 } from '@chakra-ui/react';
 import { 
   FiMessageSquare, 
-  FiChevronDown, 
-  FiChevronUp, 
   FiClock, 
   FiPlus,
   FiSidebar,
@@ -68,7 +63,6 @@ const QAInterface: React.FC = () => {
   const { isOpen: isHistoryOpen, onToggle: toggleHistory } = useDisclosure();
   const { isOpen: isNewSessionOpen, onOpen: openNewSession, onClose: closeNewSession } = useDisclosure();
   
-  const conversationBg = useColorModeValue('gray.50', 'gray.800');
   const cardBg = useColorModeValue('white', 'gray.700');
   const isMobile = useBreakpointValue({ base: true, lg: false });
   
@@ -583,39 +577,41 @@ const QAInterface: React.FC = () => {
         </Flex>
 
         {/* Mobile sessions collapse */}
-        <Collapse in={isHistoryOpen} animateOpacity>
-          <Card boxShadow="lg" borderRadius="xl" display={{ base: 'block', lg: 'none' }}>
-            <CardHeader>
-              <HStack justify="space-between">
-                <HStack>
-                  <FiClock />
-                  <Heading as="h2" size="md">Conversations</Heading>
+        <Box display={{ base: 'block', lg: 'none' }}>
+          {isHistoryOpen && (
+            <Card boxShadow="lg" borderRadius="xl">
+              <CardHeader>
+                <HStack justify="space-between">
+                  <HStack>
+                    <FiClock />
+                    <Heading as="h2" size="md">Conversations</Heading>
+                  </HStack>
+                  <IconButton
+                    aria-label="Close conversations"
+                    icon={<Icon as={FiPlus} />}
+                    size="sm"
+                    variant="ghost"
+                    onClick={toggleHistory}
+                  />
                 </HStack>
-                <IconButton
-                  aria-label="Close conversations"
-                  icon={<FiChevronUp />}
-                  size="sm"
-                  variant="ghost"
-                  onClick={toggleHistory}
-                />
-              </HStack>
-            </CardHeader>
-            
-            <CardBody pt={0}>
-              <Box maxHeight="50vh" overflowY="auto">
-                <SessionList
-                  sessions={sessions}
-                  activeSessionId={activeSession?.id}
-                  onSessionSelect={handleSessionSelect}
-                  onSessionEdit={(session) => {
-                    // Edit functionality handled by SessionHeader
-                  }}
-                  onSessionDelete={handleSessionDelete}
-                />
-              </Box>
-            </CardBody>
-          </Card>
-        </Collapse>
+              </CardHeader>
+              
+              <CardBody pt={0}>
+                <Box maxHeight="50vh" overflowY="auto">
+                  <SessionList
+                    sessions={sessions}
+                    activeSessionId={activeSession?.id}
+                    onSessionSelect={handleSessionSelect}
+                    onSessionEdit={(session) => {
+                      // Edit functionality handled by SessionHeader
+                    }}
+                    onSessionDelete={handleSessionDelete}
+                  />
+                </Box>
+              </CardBody>
+            </Card>
+          )}
+        </Box>
       </VStack>
 
       {/* New Session Modal */}

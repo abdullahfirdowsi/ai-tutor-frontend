@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Container,
-  Flex,
   Heading,
   Text,
   VStack,
@@ -18,15 +17,12 @@ import {
   Stat,
   StatLabel,
   StatNumber,
-  StatHelpText,
   SimpleGrid,
   Icon,
   Card,
   CardBody,
   CardHeader,
   Skeleton,
-  Alert,
-  AlertIcon,
   useColorModeValue,
   Progress,
   Badge,
@@ -40,7 +36,6 @@ import {
   FiHelpCircle, 
   FiTrendingUp, 
   FiAward,
-  FiCalendar,
   FiTarget,
   FiWifi,
   FiRefreshCw
@@ -87,7 +82,6 @@ const Profile: React.FC = () => {
   
   const cardBg = useColorModeValue('white', 'gray.700');
   const statBg = useColorModeValue('gray.50', 'gray.800');
-  const progressBg = useColorModeValue('brand.50', 'brand.900');
   
   // State
   const [isLoading, setIsLoading] = useState<boolean>(false);

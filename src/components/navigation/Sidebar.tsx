@@ -10,7 +10,6 @@ import {
   Badge,
   Tooltip,
   IconButton,
-  Collapse,
   useDisclosure,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
@@ -146,7 +145,6 @@ const Sidebar: React.FC = () => {
   const sidebarBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const labelColor = useColorModeValue('gray.500', 'gray.400');
-  const progressBg = useColorModeValue('brand.50', 'brand.900');
   const progressTextColor = useColorModeValue('brand.700', 'brand.300');
   const progressSubColor = useColorModeValue('gray.600', 'gray.400');
   const progressBarBg = useColorModeValue('brand.100', 'brand.800');
@@ -370,7 +368,7 @@ const Sidebar: React.FC = () => {
         {/* Weekly Goal Progress - only show when expanded */}
         {!isCollapsed && userProgress && (
           <Box
-            bg={progressBg}
+            bg={useColorModeValue('brand.50', 'brand.900')}
             p={3}
             borderRadius="lg"
             mx={2}

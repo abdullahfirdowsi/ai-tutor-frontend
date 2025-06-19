@@ -30,10 +30,6 @@ import {
   Card,
   CardBody,
   Skeleton,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
 } from '@chakra-ui/react';
 import { FiPlus, FiSearch, FiBook, FiWifi, FiRefreshCw } from 'react-icons/fi';
 import { useForm } from 'react-hook-form';
