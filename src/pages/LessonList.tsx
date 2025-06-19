@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -10,9 +10,7 @@ import {
   SimpleGrid,
   Input,
   Select,
-  HStack,
   VStack,
-  Divider,
   useDisclosure,
   Modal,
   ModalOverlay,
@@ -113,12 +111,12 @@ const LessonList: React.FC = () => {
   // State
   const [lessons, setLessons] = useState<LessonItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isUsingMockData, setIsUsingMockData] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [subjectFilter, setSubjectFilter] = useState<string>('');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [isUsingMockData, setIsUsingMockData] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Form handling for lesson generation
   const {
@@ -133,7 +131,7 @@ const LessonList: React.FC = () => {
     fetchLessons();
   }, [subjectFilter, difficultyFilter]);
   
-  const fetchLessons = async () => {
+  const fetchLessons = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
@@ -164,7 +162,7 @@ const LessonList: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [subjectFilter, difficultyFilter, toast]);
   
   // Generate a new lesson
   const generateLesson = async (data: LessonGenerateRequest) => {

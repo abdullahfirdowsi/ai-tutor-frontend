@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -8,7 +8,6 @@ import {
   Text,
   VStack,
   HStack,
-  Divider,
   Progress,
   useToast,
   Skeleton,
@@ -17,16 +16,14 @@ import {
   AlertTitle,
   AlertDescription,
   Tag,
-  Badge,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  IconButton,
   useColorModeValue,
   Container,
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
-import { FiClock, FiBookOpen } from 'react-icons/fi';
+import { FiClock } from 'react-icons/fi';
 import api from '../services/api';
 
 // Import components
@@ -166,7 +163,7 @@ const Lesson: React.FC = () => {
   }, [lessonId]);
   
   // Save progress
-  const saveProgress = async (isAutoSave: boolean = false) => {
+  const saveProgress = useCallback(async (isAutoSave: boolean = false) => {
     if (!lessonId || !lesson) return;
     
     try {
@@ -213,7 +210,7 @@ const Lesson: React.FC = () => {
         });
       }
     }
-  };
+  }, [lessonId, lesson, lessonProgress, currentSectionIndex, exerciseScore, startTime, toast]);
   
   // Mark lesson as complete
   const completeLesson = async () => {

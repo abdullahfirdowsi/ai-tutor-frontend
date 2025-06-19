@@ -11,7 +11,7 @@ import {
   useDisclosure,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { FiSend, FiPaperclip, FiChevronUp, FiChevronDown } from 'react-icons/fi';
+import { FiSend, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 
 interface QuestionInputProps {
   onSubmit: (question: string, context?: string) => void;
@@ -27,7 +27,6 @@ const QuestionInput: React.FC<QuestionInputProps> = ({
   const [question, setQuestion] = useState<string>('');
   const [context, setContext] = useState<string>('');
   const { isOpen, onToggle } = useDisclosure();
-  const buttonBg = useColorModeValue('brand.500', 'brand.400');
   const textareaBg = useColorModeValue('white', 'gray.700');
   
   const handleSubmit = () => {

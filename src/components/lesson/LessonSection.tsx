@@ -27,7 +27,7 @@ const LessonSection: React.FC<LessonSectionProps> = ({ title, content, type, med
     h3: (props: any) => <Heading as="h3" size="md" my={2} {...props} />,
     p: (props: any) => <Text my={2} lineHeight="tall" {...props} />,
     code: (props: any) => {
-      const { children, className } = props;
+      const { className } = props;
       const isCodeBlock = className?.includes('language-');
       
       return isCodeBlock ? (

@@ -23,7 +23,7 @@ import {
   Alert,
   AlertIcon,
 } from '@chakra-ui/react';
-import { FiBook, FiClock, FiAward, FiHelpCircle } from 'react-icons/fi';
+import { FiBook, FiClock, FiHelpCircle } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 

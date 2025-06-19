@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Icon, Text, useToast } from '@chakra-ui/react';
+import { Button, Icon, useToast } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';

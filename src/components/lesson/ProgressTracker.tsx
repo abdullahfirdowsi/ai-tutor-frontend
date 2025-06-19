@@ -2,7 +2,6 @@ import React from 'react';
 import {
   HStack,
   Button,
-  Box,
   Text,
   useBreakpointValue,
   useColorModeValue,

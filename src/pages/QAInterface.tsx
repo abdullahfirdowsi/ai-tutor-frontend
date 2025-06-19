@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   Box,
@@ -8,13 +8,7 @@ import {
   Text,
   VStack,
   HStack,
-  Divider,
   useColorModeValue,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
   Badge,
   Button,
   Alert,
@@ -22,7 +16,7 @@ import {
   Skeleton,
   useToast,
 } from '@chakra-ui/react';
-import { FiMessageSquare, FiClock, FiBook } from 'react-icons/fi';
+import { FiMessageSquare } from 'react-icons/fi';
 import api from '../services/api';
 
 // Import components
@@ -112,7 +106,7 @@ const QAInterface: React.FC = () => {
     scrollToBottom();
   }, [qaItems]);
   
-  const fetchQAHistory = async () => {
+  const fetchQAHistory = useCallback(async () => {
     setIsLoadingHistory(true);
     setError(null);
     
@@ -138,7 +132,7 @@ const QAInterface: React.FC = () => {
     } finally {
       setIsLoadingHistory(false);
     }
-  };
+  }, [toast]);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

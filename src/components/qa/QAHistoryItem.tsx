@@ -7,7 +7,7 @@ import {
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { FiClock, FiMessageSquare, FiBook } from 'react-icons/fi';
+import { FiClock, FiBook } from 'react-icons/fi';
 
 interface Reference {
   title: string;

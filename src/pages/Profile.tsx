@@ -18,7 +18,6 @@ import {
   Stat,
   StatLabel,
   StatNumber,
-  StatHelpText,
   SimpleGrid,
   Icon,
   Card,
@@ -28,7 +27,7 @@ import {
   AlertIcon,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { FiUser, FiEdit, FiClock, FiBook, FiHelpCircle } from 'react-icons/fi';
+import { FiEdit, FiClock, FiBook, FiHelpCircle } from 'react-icons/fi';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';

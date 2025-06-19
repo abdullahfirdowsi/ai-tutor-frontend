@@ -35,7 +35,6 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({
 }) => {
   const userBg = useColorModeValue('blue.50', 'blue.900');
   const aiBg = useColorModeValue('gray.50', 'gray.700');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
   const codeBlockBg = useColorModeValue('gray.100', 'gray.800');
   
   // Format timestamp
@@ -53,7 +52,7 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({
     p: (props: any) => <Text my={2} lineHeight="tall" {...props} />,
     a: (props: any) => <Link color="blue.500" isExternal {...props} />,
     code: (props: any) => {
-      const { children, className } = props;
+      const { className } = props;
       const isCodeBlock = className?.includes('language-');
       
       return isCodeBlock ? (
