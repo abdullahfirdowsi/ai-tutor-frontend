@@ -10,6 +10,7 @@ import {
   Container,
   HStack,
   Icon,
+  Image,
 } from '@chakra-ui/react';
 import { FiShield, FiZap, FiUsers } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
@@ -59,24 +60,17 @@ const AuthLayout: React.FC = () => {
             {/* Logo and brand */}
             <VStack spacing={4} align={{ base: 'center', lg: 'start' }}>
               <HStack spacing={3}>
-                <Box
+                <Image
+                  src="/logo.png"
+                  alt="AI Tutor Logo"
                   w="60px"
                   h="60px"
-                  bg="brand.500"
                   borderRadius="xl"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  color="white"
-                  fontWeight="bold"
-                  fontSize="2xl"
                   boxShadow="lg"
-                >
-                  AI
-                </Box>
+                />
                 <VStack align="start" spacing={0}>
                   <Heading size="xl" color={headingColor}>
-                    AI Tutor Pro
+                    AI Tutor
                   </Heading>
                   <Text color={textColor} fontSize="lg">
                     Your personalized learning companion

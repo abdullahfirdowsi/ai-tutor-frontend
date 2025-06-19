@@ -18,6 +18,7 @@ import {
   HStack,
   Badge,
   Tooltip,
+  Image,
 } from '@chakra-ui/react';
 import { 
   HamburgerIcon, 
@@ -87,20 +88,13 @@ const Navbar: React.FC = () => {
         
         <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }} align="center">
           <HStack spacing={3}>
-            <Box
+            <Image
+              src="/logo.png"
+              alt="AI Tutor Logo"
               w="40px"
               h="40px"
-              bg="brand.500"
               borderRadius="lg"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              color="white"
-              fontWeight="bold"
-              fontSize="lg"
-            >
-              AI
-            </Box>
+            />
             <Text
               textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
               fontFamily={'heading'}
@@ -111,7 +105,7 @@ const Navbar: React.FC = () => {
               to="/"
               _hover={{ textDecoration: 'none', color: 'brand.500' }}
             >
-              AI Tutor Pro
+              AI Tutor
             </Text>
           </HStack>
         </Flex>
@@ -181,7 +175,7 @@ const Navbar: React.FC = () => {
               </MenuButton>
               <MenuList>
                 <MenuItem as={RouterLink} to="/profile">Profile Settings</MenuItem>
-                <MenuItem>Learning Analytics</MenuItem>
+                <MenuItem as={RouterLink} to="/analytics">Learning Analytics</MenuItem>
                 <MenuItem>Help & Support</MenuItem>
                 <MenuItem onClick={handleLogout} color="red.500">Sign Out</MenuItem>
               </MenuList>

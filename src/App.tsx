@@ -11,6 +11,9 @@ import Lesson from './pages/Lesson';
 import LessonList from './pages/LessonList';
 import QAInterface from './pages/QAInterface';
 import Profile from './pages/Profile';
+import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
+import Completed from './pages/Completed';
 import NotFound from './pages/NotFound';
 
 // Components
@@ -38,6 +41,9 @@ function App() {
               <Route path="/lessons/:lessonId" element={<Lesson />} />
               <Route path="/qa" element={<QAInterface />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/completed" element={<Completed />} />
             </Route>
           </Route>
 
