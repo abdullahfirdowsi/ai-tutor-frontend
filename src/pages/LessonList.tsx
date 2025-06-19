@@ -22,17 +22,26 @@ import {
   FormControl,
   FormLabel,
   FormErrorMessage,
+  useToast,
+  useColorModeValue,
+  HStack,
+  InputGroup,
+  InputLeftElement,
+  Icon,
+  Card,
+  CardBody,
+  Badge,
   Skeleton,
   Alert,
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  useToast,
-  useColorModeValue,
 } from '@chakra-ui/react';
-import { FiPlus, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiFilter, FiBook, FiClock, FiCalendar } from 'react-icons/fi';
 import { useForm } from 'react-hook-form';
 import api from '../services/api';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import EmptyState from '../components/common/EmptyState';
 
 // Import components
 import LessonCard from '../components/lesson/LessonCard';
@@ -106,7 +115,8 @@ const LessonList: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const cardBg = useColorModeValue('white', 'gray.700');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const filterBg = useColorModeValue('gray.50', 'gray.700');
   
   // State
   const [lessons, setLessons] = useState<LessonItem[]>([]);
@@ -219,30 +229,24 @@ const LessonList: React.FC = () => {
   // Extract unique subjects for filter dropdown
   const subjects = Array.from(new Set(lessons.map(lesson => lesson.subject)));
   
-  // Render loading skeletons
-  const renderSkeletons = () => {
-    return Array(6).fill(0).map((_, index) => (
-      <Box key={index} p={5} shadow="md" borderWidth="1px" borderRadius="md">
-        <Skeleton height="24px" width="70%" mb={4} />
-        <Skeleton height="16px" width="40%" mb={2} />
-        <Skeleton height="16px" width="60%" mb={4} />
-        <Skeleton height="12px" width="30%" mb={2} />
-        <Skeleton height="12px" width="20%" />
-      </Box>
-    ));
-  };
-  
   return (
-    <Container maxW="container.xl" py={6}>
-      <Flex justify="space-between" align="center" mb={6}>
-        <Heading as="h1" size="xl">
-          Lessons {isUsingMockData && <Text as="span" fontSize="sm" color="orange.500">(Demo Mode)</Text>}
-        </Heading>
+    <Container maxW="container.xl" py={8}>
+      {/* Header */}
+      <Flex justify="space-between" align="center" mb={8}>
+        <VStack align="start" spacing={2}>
+          <Heading as="h1" size="xl">
+            Lessons {isUsingMockData && <Badge colorScheme="orange" ml={2}>Demo Mode</Badge>}
+          </Heading>
+          <Text color={useColorModeValue('gray.600', 'gray.400')}>
+            Discover and create AI-powered learning experiences
+          </Text>
+        </VStack>
         <Button 
           colorScheme="brand" 
           leftIcon={<FiPlus />} 
           onClick={onOpen}
           isDisabled={isUsingMockData}
+          size="lg"
         >
           Generate Lesson
         </Button>
@@ -250,7 +254,7 @@ const LessonList: React.FC = () => {
       
       {/* Demo mode warning */}
       {isUsingMockData && (
-        <Alert status="warning" mb={6} borderRadius="md">
+        <Alert status="warning" mb={8} borderRadius="lg">
           <AlertIcon />
           <AlertTitle mr={2}>Demo Mode Active</AlertTitle>
           <AlertDescription>
@@ -260,66 +264,103 @@ const LessonList: React.FC = () => {
       )}
       
       {/* Filters */}
-      <Flex 
-        mb={6} 
-        direction={{ base: 'column', md: 'row' }}
-        gap={4}
-        bg={cardBg}
-        p={4}
-        borderRadius="md"
-        boxShadow="sm"
-      >
-        <FormControl flex={2}>
-          <FormLabel htmlFor="search">Search</FormLabel>
-          <Flex align="center" position="relative">
-            <Input
-              id="search"
-              placeholder="Search by title, topic, or subject..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              paddingLeft="40px"
-            />
-            <Box position="absolute" left="12px" top="50%" transform="translateY(-50%)">
-              <FiSearch />
-            </Box>
-          </Flex>
-        </FormControl>
-        
-        <FormControl flex={1}>
-          <FormLabel htmlFor="subject">Subject</FormLabel>
-          <Select
-            id="subject"
-            placeholder="All Subjects"
-            value={subjectFilter}
-            onChange={(e) => setSubjectFilter(e.target.value)}
-          >
-            {subjects.map(subject => (
-              <option key={subject} value={subject}>{subject}</option>
-            ))}
-          </Select>
-        </FormControl>
-        
-        <FormControl flex={1}>
-          <FormLabel htmlFor="difficulty">Difficulty</FormLabel>
-          <Select
-            id="difficulty"
-            placeholder="All Difficulties"
-            value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value)}
-          >
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
-          </Select>
-        </FormControl>
-      </Flex>
+      <Card bg={cardBg} mb={8} boxShadow="sm">
+        <CardBody>
+          <VStack spacing={6}>
+            <HStack w="full" align="end" spacing={4}>
+              <FormControl flex={2}>
+                <FormLabel fontSize="sm" fontWeight="medium">Search Lessons</FormLabel>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none">
+                    <Icon as={FiSearch} color="gray.400" />
+                  </InputLeftElement>
+                  <Input
+                    placeholder="Search by title, topic, or subject..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    size="lg"
+                  />
+                </InputGroup>
+              </FormControl>
+              
+              <FormControl flex={1}>
+                <FormLabel fontSize="sm" fontWeight="medium">Subject</FormLabel>
+                <Select
+                  placeholder="All Subjects"
+                  value={subjectFilter}
+                  onChange={(e) => setSubjectFilter(e.target.value)}
+                  size="lg"
+                >
+                  {subjects.map(subject => (
+                    <option key={subject} value={subject}>{subject}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <FormControl flex={1}>
+                <FormLabel fontSize="sm" fontWeight="medium">Difficulty</FormLabel>
+                <Select
+                  placeholder="All Difficulties"
+                  value={difficultyFilter}
+                  onChange={(e) => setDifficultyFilter(e.target.value)}
+                  size="lg"
+                >
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </Select>
+              </FormControl>
+            </HStack>
+            
+            {/* Filter summary */}
+            {(searchTerm || subjectFilter || difficultyFilter) && (
+              <HStack w="full" justify="space-between" pt={4} borderTop="1px solid" borderColor={useColorModeValue('gray.200', 'gray.600')}>
+                <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+                  {filteredLessons.length} lesson{filteredLessons.length !== 1 ? 's' : ''} found
+                </Text>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSubjectFilter('');
+                    setDifficultyFilter('');
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              </HStack>
+            )}
+          </VStack>
+        </CardBody>
+      </Card>
       
       {/* Lessons grid */}
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-        {isLoading ? (
-          renderSkeletons()
-        ) : filteredLessons.length > 0 ? (
-          filteredLessons.map(lesson => (
+      {isLoading ? (
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+          {Array(6).fill(0).map((_, index) => (
+            <Card key={index} bg={cardBg}>
+              <CardBody>
+                <VStack align="stretch" spacing={4}>
+                  <Skeleton height="24px" width="80%" />
+                  <HStack>
+                    <Skeleton height="20px" width="60px" />
+                    <Skeleton height="20px" width="80px" />
+                  </HStack>
+                  <Skeleton height="16px" width="100%" />
+                  <Skeleton height="16px" width="70%" />
+                  <HStack justify="space-between">
+                    <Skeleton height="16px" width="50px" />
+                    <Skeleton height="16px" width="80px" />
+                  </HStack>
+                </VStack>
+              </CardBody>
+            </Card>
+          ))}
+        </SimpleGrid>
+      ) : filteredLessons.length > 0 ? (
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+          {filteredLessons.map(lesson => (
             <LessonCard 
               key={lesson.id} 
               lesson={lesson} 
@@ -337,16 +378,17 @@ const LessonList: React.FC = () => {
                 }
               }} 
             />
-          ))
-        ) : (
-          <Box gridColumn="span 3" textAlign="center" py={10}>
-            <Text fontSize="lg">No lessons found. Try adjusting your filters or generate a new lesson.</Text>
-            {!isUsingMockData && (
-              <Button mt={4} colorScheme="brand" onClick={onOpen}>Generate Lesson</Button>
-            )}
-          </Box>
-        )}
-      </SimpleGrid>
+          ))}
+        </SimpleGrid>
+      ) : (
+        <EmptyState
+          icon={FiBook}
+          title="No lessons found"
+          description="Try adjusting your search criteria or create a new lesson to get started."
+          actionLabel={!isUsingMockData ? "Generate Lesson" : undefined}
+          onAction={!isUsingMockData ? onOpen : undefined}
+        />
+      )}
       
       {/* Generate Lesson Modal */}
       <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -356,11 +398,12 @@ const LessonList: React.FC = () => {
           <ModalCloseButton />
           <ModalBody>
             <form id="generate-lesson-form" onSubmit={handleSubmit(generateLesson)}>
-              <VStack spacing={4} align="stretch">
+              <VStack spacing={6} align="stretch">
                 <FormControl isInvalid={!!errors.subject}>
                   <FormLabel>Subject</FormLabel>
                   <Input
                     placeholder="e.g., Mathematics, Physics, Computer Science"
+                    size="lg"
                     {...register('subject', {
                       required: 'Subject is required',
                       minLength: { value: 2, message: 'Subject must be at least 2 characters' }
@@ -373,6 +416,7 @@ const LessonList: React.FC = () => {
                   <FormLabel>Topic</FormLabel>
                   <Input
                     placeholder="e.g., Linear Algebra, Quantum Mechanics, Web Development"
+                    size="lg"
                     {...register('topic', {
                       required: 'Topic is required',
                       minLength: { value: 2, message: 'Topic must be at least 2 characters' }
@@ -385,6 +429,7 @@ const LessonList: React.FC = () => {
                   <FormLabel>Difficulty</FormLabel>
                   <Select
                     placeholder="Select difficulty"
+                    size="lg"
                     {...register('difficulty', {
                       required: 'Difficulty is required'
                     })}
@@ -401,6 +446,7 @@ const LessonList: React.FC = () => {
                   <Input
                     type="number"
                     placeholder="e.g., 30"
+                    size="lg"
                     {...register('duration_minutes', {
                       required: 'Duration is required',
                       min: { value: 5, message: 'Duration must be at least 5 minutes' },
@@ -414,6 +460,7 @@ const LessonList: React.FC = () => {
                   <FormLabel>Additional Instructions (Optional)</FormLabel>
                   <Input
                     placeholder="Any specific requirements or focus areas"
+                    size="lg"
                     {...register('additional_instructions')}
                   />
                 </FormControl>
