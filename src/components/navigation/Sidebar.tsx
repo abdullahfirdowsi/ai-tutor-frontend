@@ -32,11 +32,13 @@ interface NavItemProps {
 }
 
 const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps) => {
+  // Move all hooks to the top
   const bg = useColorModeValue('white', 'gray.800');
   const activeBg = useColorModeValue('brand.50', 'brand.900');
   const activeColor = useColorModeValue('brand.600', 'brand.300');
   const textColor = useColorModeValue('gray.600', 'gray.300');
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
+  const hoverTextColor = useColorModeValue('gray.800', 'white');
 
   const content = (
     <Box
@@ -59,7 +61,7 @@ const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps)
         transition="all 0.2s"
         _hover={{
           bg: isActive ? activeBg : hoverBg,
-          color: isActive ? activeColor : useColorModeValue('gray.800', 'white'),
+          color: isActive ? activeColor : hoverTextColor,
           transform: 'translateX(2px)',
         }}
         position="relative"
@@ -112,8 +114,15 @@ const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps)
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  
+  // Move all hooks to the top
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const labelColor = useColorModeValue('gray.500', 'gray.400');
+  const progressBg = useColorModeValue('brand.50', 'brand.900');
+  const progressTextColor = useColorModeValue('brand.700', 'brand.300');
+  const progressSubColor = useColorModeValue('gray.600', 'gray.400');
+  const progressBarBg = useColorModeValue('brand.100', 'brand.800');
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -142,7 +151,7 @@ const Sidebar: React.FC = () => {
           <Text
             fontSize="xs"
             fontWeight="bold"
-            color={useColorModeValue('gray.500', 'gray.400')}
+            color={labelColor}
             textTransform="uppercase"
             letterSpacing="wide"
             mb={3}
@@ -189,7 +198,7 @@ const Sidebar: React.FC = () => {
           <Text
             fontSize="xs"
             fontWeight="bold"
-            color={useColorModeValue('gray.500', 'gray.400')}
+            color={labelColor}
             textTransform="uppercase"
             letterSpacing="wide"
             mb={3}
@@ -226,7 +235,7 @@ const Sidebar: React.FC = () => {
           <Text
             fontSize="xs"
             fontWeight="bold"
-            color={useColorModeValue('gray.500', 'gray.400')}
+            color={labelColor}
             textTransform="uppercase"
             letterSpacing="wide"
             mb={3}
@@ -257,21 +266,21 @@ const Sidebar: React.FC = () => {
 
         {/* Progress Summary */}
         <Box
-          bg={useColorModeValue('brand.50', 'brand.900')}
+          bg={progressBg}
           p={4}
           borderRadius="lg"
           mx={2}
         >
-          <Text fontSize="sm" fontWeight="600" mb={2} color={useColorModeValue('brand.700', 'brand.300')}>
+          <Text fontSize="sm" fontWeight="600" mb={2} color={progressTextColor}>
             Weekly Progress
           </Text>
-          <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} mb={3}>
+          <Text fontSize="xs" color={progressSubColor} mb={3}>
             5 of 7 lessons completed
           </Text>
           <Box
             w="full"
             h="2"
-            bg={useColorModeValue('brand.100', 'brand.800')}
+            bg={progressBarBg}
             borderRadius="full"
             overflow="hidden"
           >

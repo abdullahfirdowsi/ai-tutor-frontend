@@ -18,21 +18,24 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   text = 'Loading...',
   fullScreen = false,
 }) => {
+  // Move all hooks to the top
   const bg = useColorModeValue('white', 'gray.800');
+  const emptyColor = useColorModeValue('gray.200', 'gray.600');
+  const textColor = useColorModeValue('gray.600', 'gray.400');
   
   const content = (
     <VStack spacing={4}>
       <Spinner
         thickness="4px"
         speed="0.65s"
-        emptyColor={useColorModeValue('gray.200', 'gray.600')}
+        emptyColor={emptyColor}
         color="brand.500"
         size={size}
       />
       {text && (
         <Text
           fontSize="sm"
-          color={useColorModeValue('gray.600', 'gray.400')}
+          color={textColor}
           fontWeight="medium"
         >
           {text}

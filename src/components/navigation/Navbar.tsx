@@ -38,9 +38,12 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Move all hooks to the top
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const logoColor = useColorModeValue('brand.600', 'brand.300');
+  const textColor = useColorModeValue('gray.600', 'white');
+  const hoverBg = useColorModeValue('gray.100', 'gray.700');
 
   const handleLogout = async () => {
     try {
@@ -57,7 +60,7 @@ const Navbar: React.FC = () => {
     <Box>
       <Flex
         bg={bg}
-        color={useColorModeValue('gray.600', 'white')}
+        color={textColor}
         minH={'72px'}
         py={{ base: 2 }}
         px={{ base: 4, md: 8 }}
@@ -82,7 +85,7 @@ const Navbar: React.FC = () => {
             icon={isOpen ? <CloseIcon w={3} h={3} /> : <HamburgerIcon w={5} h={5} />}
             variant={'ghost'}
             aria-label={'Toggle Navigation'}
-            _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}
+            _hover={{ bg: hoverBg }}
           />
         </Flex>
         
@@ -146,7 +149,7 @@ const Navbar: React.FC = () => {
               variant="ghost"
               size="sm"
               position="relative"
-              _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}
+              _hover={{ bg: hoverBg }}
             >
               <Badge
                 colorScheme="red"
@@ -175,7 +178,7 @@ const Navbar: React.FC = () => {
               icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
               variant="ghost"
               size="sm"
-              _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}
+              _hover={{ bg: hoverBg }}
             />
           </Tooltip>
           
@@ -186,7 +189,7 @@ const Navbar: React.FC = () => {
                 rightIcon={<ChevronDownIcon />}
                 variant="ghost"
                 size="sm"
-                _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}
+                _hover={{ bg: hoverBg }}
               >
                 <HStack spacing={2}>
                   <Avatar 
@@ -227,8 +230,11 @@ interface NavLinkProps {
 }
 
 const NavLink: React.FC<NavLinkProps> = ({ to, children, isActive }) => {
+  // Move hooks to the top
   const activeColor = useColorModeValue('brand.600', 'brand.300');
   const hoverColor = useColorModeValue('brand.500', 'brand.400');
+  const inactiveColor = useColorModeValue('gray.600', 'gray.300');
+  const hoverBg = useColorModeValue('gray.100', 'gray.700');
   
   return (
     <Text
@@ -238,11 +244,11 @@ const NavLink: React.FC<NavLinkProps> = ({ to, children, isActive }) => {
       py={2}
       borderRadius="md"
       fontWeight={isActive ? '600' : '500'}
-      color={isActive ? activeColor : useColorModeValue('gray.600', 'gray.300')}
+      color={isActive ? activeColor : inactiveColor}
       _hover={{
         textDecoration: 'none',
         color: hoverColor,
-        bg: useColorModeValue('gray.100', 'gray.700'),
+        bg: hoverBg,
       }}
       transition="all 0.2s"
     >
@@ -253,15 +259,20 @@ const NavLink: React.FC<NavLinkProps> = ({ to, children, isActive }) => {
 
 const MobileNav: React.FC = () => {
   const location = useLocation();
+  
+  // Move hooks to the top
+  const bg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  
   const isActive = (path: string) => location.pathname === path;
 
   return (
     <Stack
-      bg={useColorModeValue('white', 'gray.800')}
+      bg={bg}
       p={4}
       display={{ md: 'none' }}
       borderBottom={1}
-      borderColor={useColorModeValue('gray.200', 'gray.700')}
+      borderColor={borderColor}
       spacing={4}
     >
       <MobileNavLink to="/" isActive={isActive('/')}>Dashboard</MobileNavLink>
@@ -279,7 +290,10 @@ interface MobileNavLinkProps {
 }
 
 const MobileNavLink: React.FC<MobileNavLinkProps> = ({ to, children, isActive }) => {
+  // Move hooks to the top
   const activeColor = useColorModeValue('brand.600', 'brand.300');
+  const inactiveColor = useColorModeValue('gray.600', 'gray.300');
+  const hoverColor = useColorModeValue('brand.500', 'brand.400');
   
   return (
     <Text
@@ -287,10 +301,10 @@ const MobileNavLink: React.FC<MobileNavLinkProps> = ({ to, children, isActive })
       to={to}
       py={2}
       fontWeight={isActive ? '600' : '500'}
-      color={isActive ? activeColor : useColorModeValue('gray.600', 'gray.300')}
+      color={isActive ? activeColor : inactiveColor}
       _hover={{
         textDecoration: 'none',
-        color: useColorModeValue('brand.500', 'brand.400'),
+        color: hoverColor,
       }}
     >
       {children}

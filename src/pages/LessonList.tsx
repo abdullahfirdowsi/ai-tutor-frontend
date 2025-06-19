@@ -115,8 +115,12 @@ const LessonList: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  // Move all hooks to the top
   const cardBg = useColorModeValue('white', 'gray.800');
   const filterBg = useColorModeValue('gray.50', 'gray.700');
+  const headingColor = useColorModeValue('gray.600', 'gray.400');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
   
   // State
   const [lessons, setLessons] = useState<LessonItem[]>([]);
@@ -237,7 +241,7 @@ const LessonList: React.FC = () => {
           <Heading as="h1" size="xl">
             Lessons {isUsingMockData && <Badge colorScheme="orange" ml={2}>Demo Mode</Badge>}
           </Heading>
-          <Text color={useColorModeValue('gray.600', 'gray.400')}>
+          <Text color={headingColor}>
             Discover and create AI-powered learning experiences
           </Text>
         </VStack>
@@ -314,8 +318,8 @@ const LessonList: React.FC = () => {
             
             {/* Filter summary */}
             {(searchTerm || subjectFilter || difficultyFilter) && (
-              <HStack w="full" justify="space-between" pt={4} borderTop="1px solid" borderColor={useColorModeValue('gray.200', 'gray.600')}>
-                <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+              <HStack w="full" justify="space-between" pt={4} borderTop="1px solid" borderColor={borderColor}>
+                <Text fontSize="sm" color={headingColor}>
                   {filteredLessons.length} lesson{filteredLessons.length !== 1 ? 's' : ''} found
                 </Text>
                 <Button
