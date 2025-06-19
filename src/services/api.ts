@@ -7,15 +7,20 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 60000, // Increase timeout to 60 seconds for slow backend
 });
 
 // Add a request interceptor to add auth token to requests
 api.interceptors.request.use(
   async (config) => {
-    const user = auth.currentUser;
-    if (user) {
-      const token = await user.getIdToken();
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const token = await user.getIdToken();
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.warn('Failed to get auth token:', error);
     }
     return config;
   },
@@ -50,9 +55,20 @@ api.interceptors.response.use(
       }
     }
     
+    // Handle network errors or timeouts
+    if (!error.response) {
+      console.error('Network error or timeout:', error.message);
+      
+      // Check if it's a CORS error
+      if (error.message === 'Network Error') {
+        console.error('This might be a CORS issue or the backend server is not responding');
+        console.error('Backend URL:', api.defaults.baseURL);
+        console.error('Make sure the backend server is running and CORS is properly configured');
+      }
+    }
+    
     return Promise.reject(error);
   }
 );
 
 export default api;
-

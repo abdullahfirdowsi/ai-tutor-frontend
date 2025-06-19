@@ -30,9 +30,18 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       });
     } catch (error: any) {
       console.error('Google sign-in error:', error);
+      
+      let errorMessage = 'Failed to sign in with Google';
+      
+      if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'Pop-up blocked by your browser. Please allow pop-ups for this site and try again.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Error',
-        description: error.message || 'Failed to sign in with Google',
+        description: errorMessage,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -59,4 +68,3 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 };
 
 export default GoogleSignInButton;
-

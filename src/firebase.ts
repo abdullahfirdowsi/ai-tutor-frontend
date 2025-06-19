@@ -12,6 +12,23 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
+// Validate Firebase configuration
+const requiredEnvVars = [
+  'REACT_APP_FIREBASE_API_KEY',
+  'REACT_APP_FIREBASE_AUTH_DOMAIN',
+  'REACT_APP_FIREBASE_PROJECT_ID',
+  'REACT_APP_FIREBASE_STORAGE_BUCKET',
+  'REACT_APP_FIREBASE_MESSAGING_SENDER_ID',
+  'REACT_APP_FIREBASE_APP_ID'
+];
+
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.warn('Missing Firebase configuration variables:', missingVars);
+  console.warn('Using default configuration for development. Please update .env file for production.');
+}
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -27,16 +44,7 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
-// Connect to emulators in development environment
-if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_USE_FIREBASE_EMULATORS === 'true') {
-  // Auth emulator - typically runs on port 9099
-  connectAuthEmulator(auth, 'http://localhost:9099');
-  
-  // Firestore emulator - typically runs on port 8080
-  connectFirestoreEmulator(firestore, 'localhost', 8080);
-  
-  console.log('Using Firebase emulators for development');
-}
+// For Bolt.new environment, we don't use emulators
+// The app will connect directly to Firebase services
 
 export { app, auth, firestore, googleProvider };
-
