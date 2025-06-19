@@ -158,6 +158,7 @@ const Sidebar: React.FC = () => {
   const progressTextColor = useColorModeValue('brand.700', 'brand.300');
   const progressSubColor = useColorModeValue('gray.600', 'gray.400');
   const progressBarBg = useColorModeValue('brand.100', 'brand.800');
+  const weeklyGoalCardBg = useColorModeValue('brand.50', 'brand.900');
 
   // Fetch real-time user-specific counts
   useEffect(() => {
@@ -378,7 +379,7 @@ const Sidebar: React.FC = () => {
         {/* Weekly Goal Progress - only show when expanded */}
         {!isCollapsed && userProgress && (
           <Box
-            bg={useColorModeValue('brand.50', 'brand.900')}
+            bg={weeklyGoalCardBg}
             p={3}
             borderRadius="lg"
             mx={2}
