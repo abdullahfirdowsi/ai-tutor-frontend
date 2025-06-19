@@ -29,7 +29,6 @@ import {
   Icon,
   Card,
   CardBody,
-  Badge,
   Skeleton,
   Alert,
   AlertIcon,
@@ -72,43 +71,6 @@ interface LessonGenerateRequest {
   additional_instructions?: string;
 }
 
-// Mock data for when API is not available
-const mockLessons: LessonItem[] = [
-  {
-    id: 'mock-1',
-    title: 'Introduction to Machine Learning',
-    subject: 'Computer Science',
-    topic: 'Machine Learning',
-    difficulty: 'beginner',
-    duration_minutes: 45,
-    created_at: new Date().toISOString(),
-    tags: ['AI', 'ML', 'Python'],
-    summary: 'Learn the fundamentals of machine learning and its applications.'
-  },
-  {
-    id: 'mock-2',
-    title: 'Linear Algebra Basics',
-    subject: 'Mathematics',
-    topic: 'Linear Algebra',
-    difficulty: 'intermediate',
-    duration_minutes: 60,
-    created_at: new Date().toISOString(),
-    tags: ['Math', 'Vectors', 'Matrices'],
-    summary: 'Understanding vectors, matrices, and linear transformations.'
-  },
-  {
-    id: 'mock-3',
-    title: 'React Fundamentals',
-    subject: 'Web Development',
-    topic: 'React',
-    difficulty: 'beginner',
-    duration_minutes: 90,
-    created_at: new Date().toISOString(),
-    tags: ['React', 'JavaScript', 'Frontend'],
-    summary: 'Build modern web applications with React components and hooks.'
-  }
-];
-
 const LessonList: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
@@ -122,11 +84,11 @@ const LessonList: React.FC = () => {
   // State
   const [lessons, setLessons] = useState<LessonItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isUsingMockData, setIsUsingMockData] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [subjectFilter, setSubjectFilter] = useState<string>('');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Form handling for lesson generation
   const {
@@ -139,6 +101,7 @@ const LessonList: React.FC = () => {
   // Fetch lessons function
   const fetchLessons = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     
     try {
       // Build query params
@@ -148,26 +111,14 @@ const LessonList: React.FC = () => {
       
       const response = await api.get<LessonListResponse>(`/lessons${queryParams}`);
       setLessons(response.data.lessons);
-      setIsUsingMockData(false);
     } catch (err: any) {
       console.error('Error fetching lessons:', err);
-      
-      // Use mock data when API is not available
-      console.warn('API not available, using mock data');
-      setLessons(mockLessons);
-      setIsUsingMockData(true);
-      
-      toast({
-        title: 'Using Demo Data',
-        description: 'Backend API is not available. Showing demo lessons.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
+      setError('Failed to load lessons. Please check your connection and try again.');
+      setLessons([]);
     } finally {
       setIsLoading(false);
     }
-  }, [subjectFilter, difficultyFilter, toast]);
+  }, [subjectFilter, difficultyFilter]);
   
   // Fetch lessons
   useEffect(() => {
@@ -176,17 +127,6 @@ const LessonList: React.FC = () => {
   
   // Generate a new lesson
   const generateLesson = async (data: LessonGenerateRequest) => {
-    if (isUsingMockData) {
-      toast({
-        title: 'Demo Mode',
-        description: 'Lesson generation is not available in demo mode. Backend API is required.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
-      return;
-    }
-    
     setIsGenerating(true);
     
     try {
@@ -208,7 +148,7 @@ const LessonList: React.FC = () => {
       console.error('Error generating lesson:', err);
       toast({
         title: 'Failed to generate lesson',
-        description: 'Backend API is not available. Please try again later.',
+        description: err.response?.data?.detail || 'Please try again later.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -229,13 +169,28 @@ const LessonList: React.FC = () => {
   // Extract unique subjects for filter dropdown
   const subjects = Array.from(new Set(lessons.map(lesson => lesson.subject)));
   
+  if (error) {
+    return (
+      <Container maxW="container.xl" py={8}>
+        <Alert status="error" mb={8} borderRadius="lg">
+          <AlertIcon />
+          <AlertTitle mr={2}>Error Loading Lessons</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button onClick={fetchLessons} colorScheme="brand">
+          Retry
+        </Button>
+      </Container>
+    );
+  }
+
   return (
     <Container maxW="container.xl" py={8}>
       {/* Header */}
       <Flex justify="space-between" align="center" mb={8}>
         <VStack align="start" spacing={2}>
           <Heading as="h1" size="xl">
-            Lessons {isUsingMockData && <Badge colorScheme="orange" ml={2}>Demo Mode</Badge>}
+            Lessons
           </Heading>
           <Text color={headingColor}>
             Discover and create AI-powered learning experiences
@@ -245,23 +200,11 @@ const LessonList: React.FC = () => {
           colorScheme="brand" 
           leftIcon={<FiPlus />} 
           onClick={onOpen}
-          isDisabled={isUsingMockData}
           size="lg"
         >
           Generate Lesson
         </Button>
       </Flex>
-      
-      {/* Demo mode warning */}
-      {isUsingMockData && (
-        <Alert status="warning" mb={8} borderRadius="lg">
-          <AlertIcon />
-          <AlertTitle mr={2}>Demo Mode Active</AlertTitle>
-          <AlertDescription>
-            Backend API is not available. Showing demo lessons. Some features may be limited.
-          </AlertDescription>
-        </Alert>
-      )}
       
       {/* Filters */}
       <Card bg={cardBg} mb={8} boxShadow="sm">
@@ -364,19 +307,7 @@ const LessonList: React.FC = () => {
             <LessonCard 
               key={lesson.id} 
               lesson={lesson} 
-              onClick={() => {
-                if (isUsingMockData) {
-                  toast({
-                    title: 'Demo Mode',
-                    description: 'Lesson viewing is not available in demo mode.',
-                    status: 'warning',
-                    duration: 3000,
-                    isClosable: true,
-                  });
-                } else {
-                  navigate(`/lessons/${lesson.id}`);
-                }
-              }} 
+              onClick={() => navigate(`/lessons/${lesson.id}`)} 
             />
           ))}
         </SimpleGrid>
@@ -384,9 +315,13 @@ const LessonList: React.FC = () => {
         <EmptyState
           icon={FiBook}
           title="No lessons found"
-          description="Try adjusting your search criteria or create a new lesson to get started."
-          actionLabel={!isUsingMockData ? "Generate Lesson" : undefined}
-          onAction={!isUsingMockData ? onOpen : undefined}
+          description={
+            lessons.length === 0 
+              ? "No lessons available yet. Create your first lesson to get started."
+              : "Try adjusting your search criteria or create a new lesson."
+          }
+          actionLabel="Generate Lesson"
+          onAction={onOpen}
         />
       )}
       
@@ -477,7 +412,6 @@ const LessonList: React.FC = () => {
               colorScheme="brand"
               isLoading={isGenerating}
               loadingText="Generating..."
-              isDisabled={isUsingMockData}
             >
               Generate
             </Button>

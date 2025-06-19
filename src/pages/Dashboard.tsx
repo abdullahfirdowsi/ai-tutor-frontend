@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -22,6 +22,11 @@ import {
   Badge,
   SimpleGrid,
   Container,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  Skeleton,
 } from '@chakra-ui/react';
 import { 
   FiBook, 
@@ -36,66 +41,99 @@ import {
 } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
+
+interface UserProgress {
+  completed_lessons: Array<{
+    lesson_id: string;
+    title: string;
+    completed: boolean;
+    completion_date?: string;
+    score?: number;
+    time_spent: number;
+  }>;
+  current_lesson?: {
+    lesson_id: string;
+    title: string;
+    progress: number;
+    last_position?: string;
+  };
+  total_time_spent: number;
+  statistics: {
+    questions_asked?: number;
+    streak?: number;
+    weekly_goal?: number;
+    completed_this_week?: number;
+  };
+  last_active?: string;
+}
+
+interface RecentActivity {
+  type: string;
+  title: string;
+  time: string;
+  score?: number;
+}
+
+interface RecommendedLesson {
+  id: string;
+  title: string;
+  difficulty: string;
+  duration_minutes: number;
+}
 
 const Dashboard: React.FC = () => {
   const { currentUser } = useAuth();
+  const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [recommendedLessons, setRecommendedLessons] = useState<RecommendedLesson[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const cardBg = useColorModeValue('white', 'gray.800');
   const gradientBg = useColorModeValue(
     'linear(to-r, brand.500, purple.500)',
     'linear(to-r, brand.600, purple.600)'
   );
 
-  // Mock data - in a real app, this would come from API
-  const userProgress = {
-    lessonsCompleted: 12,
-    currentLesson: {
-      id: 'lesson-123',
-      title: 'Advanced React Patterns',
-      progress: 0.65,
-      timeRemaining: 25,
-    },
-    totalTimeSpent: 1240, // in minutes
-    questionsAsked: 47,
-    streak: 7,
-    weeklyGoal: 5,
-    completedThisWeek: 3,
-  };
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setIsLoading(true);
+      setError(null);
 
-  const recentActivity = [
-    {
-      type: 'lesson_completed',
-      title: 'JavaScript Fundamentals',
-      time: '2 hours ago',
-      score: 95,
-    },
-    {
-      type: 'question_asked',
-      title: 'How do closures work in JavaScript?',
-      time: '4 hours ago',
-    },
-    {
-      type: 'lesson_started',
-      title: 'React State Management',
-      time: '1 day ago',
-    },
-  ];
+      try {
+        // Fetch user progress
+        const progressResponse = await api.get('/users/me/progress');
+        setUserProgress(progressResponse.data);
 
-  const upcomingLessons = [
-    {
-      id: '1',
-      title: 'TypeScript Advanced Types',
-      difficulty: 'Advanced',
-      duration: 45,
-      thumbnail: 'https://images.pexels.com/photos/270348/pexels-photo-270348.jpeg?auto=compress&cs=tinysrgb&w=400',
-    },
-    {
-      id: '2',
-      title: 'Node.js Performance',
-      difficulty: 'Intermediate',
-      duration: 60,
-      thumbnail: 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=400',
-    },
-  ];
+        // Fetch recent activity
+        try {
+          const activityResponse = await api.get('/users/me/activity?limit=5');
+          setRecentActivity(activityResponse.data.activities || []);
+        } catch (activityError) {
+          console.warn('Failed to fetch recent activity:', activityError);
+          setRecentActivity([]);
+        }
+
+        // Fetch recommended lessons
+        try {
+          const recommendedResponse = await api.get('/lessons/recommended?limit=3');
+          setRecommendedLessons(recommendedResponse.data.lessons || []);
+        } catch (recommendedError) {
+          console.warn('Failed to fetch recommended lessons:', recommendedError);
+          setRecommendedLessons([]);
+        }
+
+      } catch (err: any) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Failed to load dashboard data. Please check your connection and try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   // Format minutes into hours and minutes
   const formatTime = (minutes: number): string => {
@@ -109,6 +147,53 @@ const Dashboard: React.FC = () => {
     if (hour < 12) return 'Good morning';
     if (hour < 18) return 'Good afternoon';
     return 'Good evening';
+  };
+
+  if (isLoading) {
+    return (
+      <Container maxW="container.xl" py={8}>
+        <VStack spacing={8} align="stretch">
+          <Skeleton height="200px" borderRadius="2xl" />
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6}>
+            {Array(4).fill(0).map((_, i) => (
+              <Skeleton key={i} height="120px" borderRadius="xl" />
+            ))}
+          </SimpleGrid>
+          <Grid templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(3, 1fr)' }} gap={8}>
+            <GridItem colSpan={{ base: 1, lg: 2 }}>
+              <Skeleton height="400px" borderRadius="xl" />
+            </GridItem>
+            <GridItem>
+              <Skeleton height="400px" borderRadius="xl" />
+            </GridItem>
+          </Grid>
+        </VStack>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxW="container.xl" py={8}>
+        <Alert status="error" borderRadius="lg">
+          <AlertIcon />
+          <AlertTitle mr={2}>Dashboard Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button mt={4} onClick={() => window.location.reload()} colorScheme="brand">
+          Retry
+        </Button>
+      </Container>
+    );
+  }
+
+  const stats = {
+    lessonsCompleted: userProgress?.completed_lessons?.length || 0,
+    totalTimeSpent: userProgress?.total_time_spent ? Math.floor(userProgress.total_time_spent / 60) : 0,
+    questionsAsked: userProgress?.statistics?.questions_asked || 0,
+    streak: userProgress?.statistics?.streak || 0,
+    weeklyGoal: userProgress?.statistics?.weekly_goal || 5,
+    completedThisWeek: userProgress?.statistics?.completed_this_week || 0,
   };
 
   return (
@@ -133,26 +218,31 @@ const Dashboard: React.FC = () => {
                 Ready to continue learning?
               </Heading>
               <Text opacity={0.9} maxW="md">
-                You're on a {userProgress.streak}-day learning streak! Keep it up to reach your weekly goal.
+                {stats.streak > 0 
+                  ? `You're on a ${stats.streak}-day learning streak! Keep it up to reach your weekly goal.`
+                  : 'Start your learning journey today!'
+                }
               </Text>
             </VStack>
             <VStack align="end" spacing={2}>
-              <Badge colorScheme="yellow" variant="solid" px={3} py={1} borderRadius="full">
-                🔥 {userProgress.streak} Day Streak
-              </Badge>
+              {stats.streak > 0 && (
+                <Badge colorScheme="yellow" variant="solid" px={3} py={1} borderRadius="full">
+                  🔥 {stats.streak} Day Streak
+                </Badge>
+              )}
               <Text fontSize="sm" opacity={0.8}>
-                {userProgress.completedThisWeek}/{userProgress.weeklyGoal} lessons this week
+                {stats.completedThisWeek}/{stats.weeklyGoal} lessons this week
               </Text>
             </VStack>
           </HStack>
           
-          {userProgress.currentLesson && (
+          {userProgress?.current_lesson && (
             <Card bg="whiteAlpha.200" backdropFilter="blur(10px)" border="1px solid" borderColor="whiteAlpha.300">
               <CardBody>
                 <HStack justify="space-between" mb={3}>
                   <VStack align="start" spacing={1}>
                     <Text fontSize="sm" opacity={0.9}>Continue Learning</Text>
-                    <Text fontWeight="bold">{userProgress.currentLesson.title}</Text>
+                    <Text fontWeight="bold">{userProgress.current_lesson.title}</Text>
                   </VStack>
                   <Button
                     leftIcon={<FiPlay />}
@@ -160,21 +250,20 @@ const Dashboard: React.FC = () => {
                     variant="solid"
                     size="sm"
                     as={RouterLink}
-                    to="/lessons"
+                    to={`/lessons/${userProgress.current_lesson.lesson_id}`}
                   >
                     Resume
                   </Button>
                 </HStack>
                 <Progress 
-                  value={userProgress.currentLesson.progress * 100} 
+                  value={userProgress.current_lesson.progress * 100} 
                   colorScheme="yellow"
                   bg="whiteAlpha.300"
                   borderRadius="full"
                   size="sm"
                 />
                 <HStack justify="space-between" mt={2} fontSize="sm" opacity={0.9}>
-                  <Text>{Math.round(userProgress.currentLesson.progress * 100)}% complete</Text>
-                  <Text>{userProgress.currentLesson.timeRemaining} min remaining</Text>
+                  <Text>{Math.round(userProgress.current_lesson.progress * 100)}% complete</Text>
                 </HStack>
               </CardBody>
             </Card>
@@ -199,28 +288,28 @@ const Dashboard: React.FC = () => {
         <StatCard
           icon={FiBook}
           label="Lessons Completed"
-          value={userProgress.lessonsCompleted}
+          value={stats.lessonsCompleted}
           helpText="Total completed"
           colorScheme="blue"
         />
         <StatCard
           icon={FiClock}
           label="Learning Time"
-          value={formatTime(userProgress.totalTimeSpent)}
+          value={formatTime(stats.totalTimeSpent)}
           helpText="Total time spent"
           colorScheme="green"
         />
         <StatCard
           icon={FiHelpCircle}
           label="Questions Asked"
-          value={userProgress.questionsAsked}
+          value={stats.questionsAsked}
           helpText="AI interactions"
           colorScheme="purple"
         />
         <StatCard
           icon={FiTarget}
           label="Weekly Goal"
-          value={`${userProgress.completedThisWeek}/${userProgress.weeklyGoal}`}
+          value={`${stats.completedThisWeek}/${stats.weeklyGoal}`}
           helpText="Lessons this week"
           colorScheme="orange"
         />
@@ -242,11 +331,17 @@ const Dashboard: React.FC = () => {
               </HStack>
             </CardHeader>
             <CardBody pt={0}>
-              <VStack spacing={4} align="stretch">
-                {recentActivity.map((activity, index) => (
-                  <ActivityItem key={index} activity={activity} />
-                ))}
-              </VStack>
+              {recentActivity.length > 0 ? (
+                <VStack spacing={4} align="stretch">
+                  {recentActivity.map((activity, index) => (
+                    <ActivityItem key={index} activity={activity} />
+                  ))}
+                </VStack>
+              ) : (
+                <Text color="gray.500" textAlign="center" py={8}>
+                  No recent activity. Start learning to see your progress here!
+                </Text>
+              )}
             </CardBody>
           </Card>
         </GridItem>
@@ -299,11 +394,17 @@ const Dashboard: React.FC = () => {
                 <Heading size="md">Recommended for You</Heading>
               </CardHeader>
               <CardBody pt={0}>
-                <VStack spacing={4} align="stretch">
-                  {upcomingLessons.map((lesson) => (
-                    <RecommendedLessonCard key={lesson.id} lesson={lesson} />
-                  ))}
-                </VStack>
+                {recommendedLessons.length > 0 ? (
+                  <VStack spacing={4} align="stretch">
+                    {recommendedLessons.map((lesson) => (
+                      <RecommendedLessonCard key={lesson.id} lesson={lesson} />
+                    ))}
+                  </VStack>
+                ) : (
+                  <Text color="gray.500" textAlign="center" py={4}>
+                    Complete more lessons to get personalized recommendations!
+                  </Text>
+                )}
               </CardBody>
               <CardFooter pt={0}>
                 <Button
@@ -320,15 +421,17 @@ const Dashboard: React.FC = () => {
             </Card>
 
             {/* Achievement */}
-            <Card bg={cardBg} borderColor="yellow.200" borderWidth="2px">
-              <CardBody textAlign="center">
-                <Icon as={FiAward} boxSize={8} color="yellow.500" mb={2} />
-                <Text fontWeight="bold" mb={1}>Achievement Unlocked!</Text>
-                <Text fontSize="sm" color="gray.600">
-                  Completed 10+ lessons this month
-                </Text>
-              </CardBody>
-            </Card>
+            {stats.lessonsCompleted >= 10 && (
+              <Card bg={cardBg} borderColor="yellow.200" borderWidth="2px">
+                <CardBody textAlign="center">
+                  <Icon as={FiAward} boxSize={8} color="yellow.500" mb={2} />
+                  <Text fontWeight="bold" mb={1}>Achievement Unlocked!</Text>
+                  <Text fontSize="sm" color="gray.600">
+                    Completed {stats.lessonsCompleted}+ lessons!
+                  </Text>
+                </CardBody>
+              </Card>
+            )}
           </VStack>
         </GridItem>
       </Grid>
@@ -409,8 +512,7 @@ interface RecommendedLessonCardProps {
     id: string;
     title: string;
     difficulty: string;
-    duration: number;
-    thumbnail: string;
+    duration_minutes: number;
   };
 }
 
@@ -436,6 +538,8 @@ const RecommendedLessonCard: React.FC<RecommendedLessonCardProps> = ({ lesson })
       _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
       cursor="pointer"
       transition="all 0.2s"
+      as={RouterLink}
+      to={`/lessons/${lesson.id}`}
     >
       <Box
         w="50px"
@@ -458,7 +562,7 @@ const RecommendedLessonCard: React.FC<RecommendedLessonCardProps> = ({ lesson })
             {lesson.difficulty}
           </Badge>
           <Text fontSize="xs" color="gray.500">
-            {lesson.duration} min
+            {lesson.duration_minutes} min
           </Text>
         </HStack>
       </VStack>
