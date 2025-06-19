@@ -32,9 +32,10 @@ interface NavItemProps {
 }
 
 interface SidebarCounts {
-  totalLessons: number;
-  pendingQuestions: number;
-  bookmarks: number;
+  userLessons: number; // User's created lessons
+  availableLessons: number; // Total available lessons
+  userQuestions: number; // User's Q&A history
+  completedLessons: number; // User's completed lessons
 }
 
 const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps) => {
@@ -120,9 +121,10 @@ const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps)
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const [counts, setCounts] = useState<SidebarCounts>({
-    totalLessons: 0,
-    pendingQuestions: 0,
-    bookmarks: 0,
+    userLessons: 0,
+    availableLessons: 0,
+    userQuestions: 0,
+    completedLessons: 0,
   });
   const [userProgress, setUserProgress] = useState<any>(null);
   
@@ -135,29 +137,41 @@ const Sidebar: React.FC = () => {
   const progressSubColor = useColorModeValue('gray.600', 'gray.400');
   const progressBarBg = useColorModeValue('brand.100', 'brand.800');
 
-  // Fetch real-time counts
+  // Fetch real-time user-specific counts
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        // Fetch lessons count
-        const lessonsResponse = await api.get('/lessons?limit=1');
-        const totalLessons = lessonsResponse.data.total || 0;
-
-        // Fetch Q&A history count (pending/recent questions)
-        const qaResponse = await api.get('/qa/history?limit=1');
-        const pendingQuestions = qaResponse.data.total || 0;
-
-        // Fetch user progress for bookmarks/saved items
+        // Fetch user's progress first
         const progressResponse = await api.get('/users/me/progress');
-        setUserProgress(progressResponse.data);
-        
-        // For now, use completed lessons as bookmarks count
-        const bookmarks = progressResponse.data?.completed_lessons?.length || 0;
+        const progressData = progressResponse.data;
+        setUserProgress(progressData);
+
+        // Get completed lessons count
+        const completedLessons = progressData?.completed_lessons?.length || 0;
+
+        // Fetch user's Q&A history count
+        const qaResponse = await api.get('/qa/history?limit=1');
+        const userQuestions = qaResponse.data.total || 0;
+
+        // Fetch total available lessons (all lessons in system)
+        const lessonsResponse = await api.get('/lessons?limit=1');
+        const availableLessons = lessonsResponse.data.total || 0;
+
+        // Try to fetch user's created lessons (if endpoint exists)
+        let userLessons = 0;
+        try {
+          const userLessonsResponse = await api.get('/lessons/my-lessons?limit=1');
+          userLessons = userLessonsResponse.data.total || 0;
+        } catch (error) {
+          // If endpoint doesn't exist, we'll show available lessons instead
+          console.warn('User-specific lessons endpoint not available');
+        }
 
         setCounts({
-          totalLessons,
-          pendingQuestions,
-          bookmarks,
+          userLessons,
+          availableLessons,
+          userQuestions,
+          completedLessons,
         });
       } catch (error) {
         console.warn('Failed to fetch sidebar counts:', error);
@@ -227,8 +241,8 @@ const Sidebar: React.FC = () => {
               icon={FiBook} 
               to="/lessons" 
               isActive={isActive('/lessons')}
-              badge={counts.totalLessons > 0 ? counts.totalLessons : undefined}
-              tooltip="Browse and take lessons"
+              badge={counts.availableLessons > 0 ? counts.availableLessons : undefined}
+              tooltip={`${counts.availableLessons} lessons available to study`}
             >
               Lessons
             </NavItem>
@@ -237,8 +251,8 @@ const Sidebar: React.FC = () => {
               icon={FiHelpCircle} 
               to="/qa" 
               isActive={isActive('/qa')}
-              badge={counts.pendingQuestions > 0 ? counts.pendingQuestions : undefined}
-              tooltip="Ask questions and get AI help"
+              badge={counts.userQuestions > 0 ? counts.userQuestions : undefined}
+              tooltip={`${counts.userQuestions} questions in your history`}
             >
               Q&A
             </NavItem>
@@ -247,7 +261,7 @@ const Sidebar: React.FC = () => {
 
         <Divider />
 
-        {/* Learning Tools */}
+        {/* Learning Progress */}
         <Box>
           <Text
             fontSize="xs"
@@ -258,24 +272,24 @@ const Sidebar: React.FC = () => {
             mb={3}
             px={2}
           >
-            Tools
+            Progress
           </Text>
           <VStack spacing={1} align="stretch">
             <NavItem 
               icon={FiTrendingUp} 
               to="/analytics" 
               isActive={isActive('/analytics')}
-              tooltip="View your learning progress"
+              tooltip="View detailed learning analytics"
             >
               Analytics
             </NavItem>
             
             <NavItem 
               icon={FiBookmark} 
-              to="/bookmarks" 
-              isActive={isActive('/bookmarks')}
-              badge={counts.bookmarks > 0 ? counts.bookmarks : undefined}
-              tooltip="Your completed lessons"
+              to="/completed" 
+              isActive={isActive('/completed')}
+              badge={counts.completedLessons > 0 ? counts.completedLessons : undefined}
+              tooltip={`${counts.completedLessons} lessons completed`}
             >
               Completed
             </NavItem>
@@ -302,7 +316,7 @@ const Sidebar: React.FC = () => {
               icon={FiUser} 
               to="/profile" 
               isActive={isActive('/profile')}
-              tooltip="Manage your profile"
+              tooltip="Manage your profile and settings"
             >
               Profile
             </NavItem>
@@ -311,14 +325,14 @@ const Sidebar: React.FC = () => {
               icon={FiSettings} 
               to="/settings" 
               isActive={isActive('/settings')}
-              tooltip="App settings and preferences"
+              tooltip="App preferences and configuration"
             >
               Settings
             </NavItem>
           </VStack>
         </Box>
 
-        {/* Progress Summary */}
+        {/* Weekly Goal Progress */}
         {userProgress && (
           <Box
             bg={progressBg}
@@ -347,6 +361,9 @@ const Sidebar: React.FC = () => {
                 transition="width 0.3s ease"
               />
             </Box>
+            <Text fontSize="xs" color={progressSubColor} mt={2}>
+              {Math.round(progressPercentage)}% complete
+            </Text>
           </Box>
         )}
       </VStack>
