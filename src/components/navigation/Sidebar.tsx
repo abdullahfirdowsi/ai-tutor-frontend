@@ -44,6 +44,7 @@ interface SidebarCounts {
 }
 
 const NavItem = ({ icon, children, to, isActive, badge, tooltip, isCollapsed }: NavItemProps) => {
+  // Call all hooks at the top level, unconditionally
   const activeBg = useColorModeValue('brand.50', 'brand.900');
   const activeColor = useColorModeValue('brand.600', 'brand.300');
   const textColor = useColorModeValue('gray.600', 'gray.300');
@@ -120,18 +121,27 @@ const NavItem = ({ icon, children, to, isActive, badge, tooltip, isCollapsed }: 
     </Box>
   );
 
-  return tooltip && isCollapsed ? (
-    <Tooltip label={`${children}${badge ? ` (${badge})` : ''}`} placement="right" hasArrow>
-      {content}
-    </Tooltip>
-  ) : tooltip ? (
-    <Tooltip label={tooltip} placement="right" hasArrow>
-      {content}
-    </Tooltip>
-  ) : content;
+  if (tooltip && isCollapsed) {
+    return (
+      <Tooltip label={`${children}${badge ? ` (${badge})` : ''}`} placement="right" hasArrow>
+        {content}
+      </Tooltip>
+    );
+  }
+  
+  if (tooltip) {
+    return (
+      <Tooltip label={tooltip} placement="right" hasArrow>
+        {content}
+      </Tooltip>
+    );
+  }
+  
+  return content;
 };
 
 const Sidebar: React.FC = () => {
+  // Call all hooks at the top level, unconditionally
   const location = useLocation();
   const { isOpen: isCollapsed, onToggle } = useDisclosure();
   const [counts, setCounts] = useState<SidebarCounts>({
@@ -200,7 +210,7 @@ const Sidebar: React.FC = () => {
   const weeklyGoal = userProgress?.statistics?.weekly_goal || 7;
   const progressPercentage = weeklyGoal > 0 ? (weeklyProgress / weeklyGoal) * 100 : 0;
 
-  const sidebarWidth = isCollapsed ? '80px' : '200px'; // Reduced from 240px to 200px
+  const sidebarWidth = isCollapsed ? '80px' : '200px';
 
   // Update CSS variable for MainLayout
   useEffect(() => {
