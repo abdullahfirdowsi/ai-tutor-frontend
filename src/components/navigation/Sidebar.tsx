@@ -202,7 +202,12 @@ const Sidebar: React.FC = () => {
   const weeklyGoal = userProgress?.statistics?.weekly_goal || 7;
   const progressPercentage = weeklyGoal > 0 ? (weeklyProgress / weeklyGoal) * 100 : 0;
 
-  const sidebarWidth = isCollapsed ? '80px' : '240px';
+  const sidebarWidth = isCollapsed ? '80px' : '200px'; // Reduced from 240px to 200px
+
+  // Update CSS variable for MainLayout
+  useEffect(() => {
+    document.documentElement.style.setProperty('--sidebar-width', sidebarWidth);
+  }, [sidebarWidth]);
 
   return (
     <Box
