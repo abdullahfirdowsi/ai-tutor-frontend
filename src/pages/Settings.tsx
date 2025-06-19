@@ -14,11 +14,9 @@ import {
   Select,
   Input,
   Button,
-  Divider,
   useToast,
   useColorMode,
   Icon,
-  Badge,
   Slider,
   SliderTrack,
   SliderFilledTrack,
@@ -28,24 +26,19 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  Textarea,
   Alert,
   AlertIcon,
   AlertTitle,
   AlertDescription,
   SimpleGrid,
-  Box,
   useColorModeValue,
 } from '@chakra-ui/react';
 import {
-  FiSettings,
-  FiUser,
   FiBell,
   FiShield,
   FiMoon,
   FiSun,
   FiGlobe,
-  FiTarget,
   FiBook,
   FiSave,
   FiRefreshCw,
@@ -102,12 +95,10 @@ interface UserSettings {
 }
 
 const Settings: React.FC = () => {
-  const { currentUser } = useAuth();
   const { colorMode, toggleColorMode } = useColorMode();
   const toast = useToast();
   
   const cardBg = useColorModeValue('white', 'gray.700');
-  const sectionBg = useColorModeValue('gray.50', 'gray.800');
   
   const [settings, setSettings] = useState<UserSettings>({
     learning_preferences: {

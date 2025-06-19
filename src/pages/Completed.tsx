@@ -39,16 +39,15 @@ import {
   FiBook,
   FiClock,
   FiAward,
-  FiTrendingUp,
   FiSearch,
-  FiFilter,
   FiDownload,
   FiShare2,
   FiMoreVertical,
   FiCalendar,
   FiTarget,
-  FiStar,
   FiRefreshCw,
+  FiEdit,
+  FiTrash2,
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -82,7 +81,6 @@ interface CompletionStats {
 const Completed: React.FC = () => {
   const navigate = useNavigate();
   const cardBg = useColorModeValue('white', 'gray.700');
-  const statBg = useColorModeValue('gray.50', 'gray.800');
   
   const [completedLessons, setCompletedLessons] = useState<CompletedLesson[]>([]);
   const [stats, setStats] = useState<CompletionStats | null>(null);

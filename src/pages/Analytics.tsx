@@ -36,7 +36,6 @@ import {
   FiHelpCircle,
   FiTarget,
   FiAward,
-  FiCalendar,
   FiBarChart,
   FiPieChart,
   FiActivity,
@@ -50,8 +49,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -110,13 +107,8 @@ const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d');
 
   const cardBg = useColorModeValue('white', 'gray.700');
-  const statBg = useColorModeValue('gray.50', 'gray.800');
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [timeRange]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = React.useCallback(async () => {
     setIsLoading(true);
     setHasError(false);
 
@@ -175,7 +167,11 @@ const Analytics: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   const formatTime = (minutes: number): string => {
     const hours = Math.floor(minutes / 60);
@@ -474,7 +470,7 @@ const Analytics: React.FC = () => {
                 <Heading size="md">Weekly Goals</Heading>
               </HStack>
               <Badge colorScheme="brand" variant="subtle" px={3} py={1}>
-                Week {new Date().getWeek()}
+                Week {getCurrentWeek()}
               </Badge>
             </HStack>
           </CardHeader>
@@ -535,18 +531,12 @@ const Analytics: React.FC = () => {
 };
 
 // Helper function to get week number
-declare global {
-  interface Date {
-    getWeek(): number;
-  }
-}
-
-Date.prototype.getWeek = function() {
-  const date = new Date(this.getTime());
+function getCurrentWeek(): number {
+  const date = new Date();
   date.setHours(0, 0, 0, 0);
   date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
   const week1 = new Date(date.getFullYear(), 0, 4);
   return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-};
+}
 
 export default Analytics;
