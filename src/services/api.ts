@@ -3,7 +3,7 @@ import { auth } from '../firebase';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: 'https://ai-tutor-backend-bjbg.onrender.com/api/v',
+  baseURL: 'https://ai-tutor-backend-bjbg.onrender.com/api/v1',
 
   headers: {
     'Content-Type': 'application/json',
