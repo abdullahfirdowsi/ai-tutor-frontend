@@ -85,6 +85,7 @@ const LessonList: React.FC = () => {
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [hasNetworkError, setHasNetworkError] = useState<boolean>(false);
+  const [hasFetched, setHasFetched] = useState<boolean>(false);
   
   // Form handling for lesson generation
   const {
@@ -94,8 +95,11 @@ const LessonList: React.FC = () => {
     reset,
   } = useForm<LessonGenerateRequest>();
   
-  // Fetch lessons function
+  // Fetch lessons function - memoized to prevent unnecessary re-renders
   const fetchLessons = useCallback(async () => {
+    // Prevent multiple simultaneous fetches
+    if (isLoading && hasFetched) return;
+    
     setIsLoading(true);
     setHasNetworkError(false);
     
@@ -107,6 +111,7 @@ const LessonList: React.FC = () => {
       
       const response = await api.get<LessonListResponse>(`/lessons${queryParams}`);
       setLessons(response.data.lessons || []);
+      setHasFetched(true);
     } catch (err: any) {
       console.warn('Failed to fetch lessons:', err);
       
@@ -116,16 +121,26 @@ const LessonList: React.FC = () => {
       } else {
         // For other errors (like 404, 401), just show empty state
         setLessons([]);
+        setHasFetched(true);
       }
     } finally {
       setIsLoading(false);
     }
+  }, [subjectFilter, difficultyFilter, isLoading, hasFetched]);
+  
+  // Fetch lessons only once on mount and when filters change
+  useEffect(() => {
+    // Reset hasFetched when filters change
+    if (hasFetched) {
+      setHasFetched(false);
+    }
   }, [subjectFilter, difficultyFilter]);
   
-  // Fetch lessons
   useEffect(() => {
-    fetchLessons();
-  }, [fetchLessons]);
+    if (!hasFetched) {
+      fetchLessons();
+    }
+  }, [fetchLessons, hasFetched]);
   
   // Generate a new lesson
   const generateLesson = async (data: LessonGenerateRequest) => {
@@ -160,16 +175,26 @@ const LessonList: React.FC = () => {
     }
   };
   
-  // Filter lessons by search term
-  const filteredLessons = lessons.filter(lesson => 
-    lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lesson.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lesson.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (lesson.summary && lesson.summary.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Filter lessons by search term - memoized to prevent unnecessary re-calculations
+  const filteredLessons = React.useMemo(() => {
+    return lessons.filter(lesson => 
+      lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lesson.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lesson.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lesson.summary && lesson.summary.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [lessons, searchTerm]);
   
-  // Extract unique subjects for filter dropdown
-  const subjects = Array.from(new Set(lessons.map(lesson => lesson.subject)));
+  // Extract unique subjects for filter dropdown - memoized
+  const subjects = React.useMemo(() => {
+    return Array.from(new Set(lessons.map(lesson => lesson.subject)));
+  }, [lessons]);
+  
+  // Retry function for network errors
+  const handleRetry = useCallback(() => {
+    setHasFetched(false);
+    setHasNetworkError(false);
+  }, []);
   
   // Show network error only for critical failures
   if (hasNetworkError) {
@@ -186,7 +211,7 @@ const LessonList: React.FC = () => {
           <HStack spacing={4}>
             <Button 
               leftIcon={<FiRefreshCw />}
-              onClick={fetchLessons} 
+              onClick={handleRetry} 
               colorScheme="brand"
             >
               Try Again
@@ -221,6 +246,8 @@ const LessonList: React.FC = () => {
           leftIcon={<FiPlus />} 
           onClick={onOpen}
           size="lg"
+          isLoading={isGenerating}
+          loadingText="Generating..."
         >
           Generate Lesson
         </Button>
