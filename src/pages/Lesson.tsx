@@ -21,9 +21,16 @@ import {
   BreadcrumbLink,
   useColorModeValue,
   Container,
+  Divider,
+  Card,
+  CardBody,
+  CardHeader,
+  SimpleGrid,
+  Link,
+  Icon,
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
-import { FiClock } from 'react-icons/fi';
+import { FiClock, FiExternalLink, FiFileText } from 'react-icons/fi';
 import api from '../services/api';
 
 // Import components
@@ -85,6 +92,7 @@ const Lesson: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const cardBg = useColorModeValue('white', 'gray.700');
+  const contentBg = useColorModeValue('gray.50', 'gray.800');
   
   // State
   const [lesson, setLesson] = useState<LessonData | null>(null);
@@ -107,7 +115,6 @@ const Lesson: React.FC = () => {
     try {
       const timeSpent = lessonProgress.time_spent + Math.floor((Date.now() - startTime) / 1000);
       
-      // Calculate progress percentage based on current section
       const progressPercentage = lesson.content.length > 0 
         ? (currentSectionIndex + 1) / lesson.content.length 
         : 0;
@@ -122,10 +129,7 @@ const Lesson: React.FC = () => {
       
       await api.post(`/lessons/${lessonId}/progress`, progressData);
       
-      // Reset start time
       setStartTime(Date.now());
-      
-      // Update local progress state
       setLessonProgress(progressData);
       
       if (!isAutoSave) {
@@ -162,7 +166,6 @@ const Lesson: React.FC = () => {
         const response = await api.get(`/lessons/${lessonId}`);
         setLesson(response.data);
         
-        // Check if there's existing progress
         const progressResponse = await api.get(`/users/me/progress?lesson_id=${lessonId}`);
         if (progressResponse.data && progressResponse.data.completed_lessons) {
           const existingProgress = progressResponse.data.completed_lessons.find(
@@ -178,7 +181,6 @@ const Lesson: React.FC = () => {
               last_position: existingProgress.last_position,
             });
             
-            // Set current section based on last position
             if (existingProgress.last_position) {
               const sectionIndex = parseInt(existingProgress.last_position);
               if (!isNaN(sectionIndex)) {
@@ -197,15 +199,13 @@ const Lesson: React.FC = () => {
     
     fetchLesson();
     
-    // Set up timer for tracking time spent
     const timer = setInterval(() => {
       setLessonProgress(prev => ({
         ...prev,
-        time_spent: prev.time_spent + 5, // Add 5 seconds
+        time_spent: prev.time_spent + 5,
       }));
     }, 5000);
     
-    // Clean up
     return () => {
       clearInterval(timer);
       saveProgress(true);
@@ -217,7 +217,6 @@ const Lesson: React.FC = () => {
     if (!lessonId || !lesson) return;
     
     try {
-      // Calculate final score from exercises if available
       let finalScore = exerciseScore;
       if (!finalScore && Object.keys(exerciseAnswers).length > 0) {
         let correctAnswers = 0;
@@ -235,7 +234,7 @@ const Lesson: React.FC = () => {
       const timeSpent = lessonProgress.time_spent + Math.floor((Date.now() - startTime) / 1000);
       
       const progressData: LessonProgress = {
-        progress: 1.0, // 100%
+        progress: 1.0,
         time_spent: timeSpent,
         completed: true,
         score: finalScore === null ? undefined : finalScore,
@@ -244,7 +243,6 @@ const Lesson: React.FC = () => {
       
       await api.post(`/lessons/${lessonId}/progress`, progressData);
       
-      // Update local progress state
       setLessonProgress(progressData);
       
       toast({
@@ -255,7 +253,6 @@ const Lesson: React.FC = () => {
         isClosable: true,
       });
       
-      // Redirect to dashboard after a delay
       setTimeout(() => {
         navigate('/');
       }, 2000);
@@ -271,7 +268,6 @@ const Lesson: React.FC = () => {
     }
   };
   
-  // Handle exercise answer selection
   const handleAnswerSelect = (exerciseIndex: number, answer: string) => {
     setExerciseAnswers(prev => ({
       ...prev,
@@ -279,7 +275,6 @@ const Lesson: React.FC = () => {
     }));
   };
   
-  // Navigation between sections
   const navigateToSection = (index: number) => {
     if (index >= 0 && index < (lesson?.content.length || 0)) {
       setCurrentSectionIndex(index);
@@ -287,16 +282,14 @@ const Lesson: React.FC = () => {
     }
   };
   
-  // Calculate progress for progress bar
   const calculateProgress = (): number => {
     if (!lesson || lesson.content.length === 0) return 0;
     return ((currentSectionIndex + 1) / lesson.content.length) * 100;
   };
   
-  // Loading state
   if (isLoading) {
     return (
-      <Container maxW="container.lg" py={8}>
+      <Container maxW="container.xl" py={8}>
         <VStack spacing={6} align="stretch">
           <Skeleton height="40px" width="70%" />
           <Skeleton height="20px" width="40%" />
@@ -310,10 +303,9 @@ const Lesson: React.FC = () => {
     );
   }
   
-  // Error state
   if (error || !lesson) {
     return (
-      <Container maxW="container.lg" py={8}>
+      <Container maxW="container.xl" py={8}>
         <Alert status="error" borderRadius="md">
           <AlertIcon />
           <AlertTitle mr={2}>Error!</AlertTitle>
@@ -326,15 +318,14 @@ const Lesson: React.FC = () => {
     );
   }
   
-  // Current section to display
   const currentSection = lesson.content[currentSectionIndex];
   const isLastSection = currentSectionIndex === lesson.content.length - 1;
   const isFirstSection = currentSectionIndex === 0;
   
   return (
-    <Container maxW="container.lg" py={6}>
+    <Container maxW="container.xl" py={6}>
       {/* Breadcrumbs */}
-      <Breadcrumb mb={4} fontSize="sm">
+      <Breadcrumb mb={6} fontSize="sm">
         <BreadcrumbItem>
           <BreadcrumbLink onClick={() => navigate('/')}>Home</BreadcrumbLink>
         </BreadcrumbItem>
@@ -346,129 +337,204 @@ const Lesson: React.FC = () => {
         </BreadcrumbItem>
       </Breadcrumb>
       
-      {/* Lesson header */}
-      <Box bg={cardBg} p={6} borderRadius="md" mb={6} boxShadow="sm">
-        <Heading as="h1" size="xl" mb={2}>{lesson.title}</Heading>
-        <HStack spacing={4} mb={4}>
-          <Tag colorScheme="blue">{lesson.subject}</Tag>
-          <Tag colorScheme="purple">{lesson.difficulty}</Tag>
-          <Flex align="center">
-            <FiClock style={{ marginRight: '0.5rem' }} />
-            <Text fontSize="sm">{lesson.duration_minutes} minutes</Text>
-          </Flex>
-        </HStack>
-        
-        {lesson.summary && (
-          <Text fontSize="md" fontStyle="italic" color="gray.600">
-            {lesson.summary}
-          </Text>
-        )}
-        
-        {/* Progress bar */}
-        <Box mt={4}>
-          <Text fontSize="sm" mb={1}>Progress: {Math.round(calculateProgress())}%</Text>
-          <Progress value={calculateProgress()} size="sm" colorScheme="brand" hasStripe rounded="md" />
-        </Box>
-      </Box>
+      {/* Lesson header - Enhanced */}
+      <Card bg={cardBg} mb={8} boxShadow="lg" borderRadius="xl">
+        <CardHeader pb={4}>
+          <VStack align="stretch" spacing={4}>
+            <Heading as="h1" size="2xl" color="brand.600" lineHeight="shorter">
+              {lesson.title}
+            </Heading>
+            
+            <HStack spacing={4} flexWrap="wrap">
+              <Tag colorScheme="blue" size="lg" px={4} py={2}>
+                {lesson.subject}
+              </Tag>
+              <Tag colorScheme="purple" size="lg" px={4} py={2}>
+                {lesson.difficulty}
+              </Tag>
+              <Flex align="center" bg={contentBg} px={4} py={2} borderRadius="full">
+                <Icon as={FiClock} mr={2} color="gray.500" />
+                <Text fontSize="sm" fontWeight="medium">{lesson.duration_minutes} minutes</Text>
+              </Flex>
+            </HStack>
+            
+            {lesson.summary && (
+              <Box p={4} bg={contentBg} borderRadius="lg" borderLeft="4px solid" borderLeftColor="brand.500">
+                <Text fontSize="lg" fontStyle="italic" color="gray.700" lineHeight="tall">
+                  {lesson.summary}
+                </Text>
+              </Box>
+            )}
+            
+            {/* Enhanced Progress bar */}
+            <Box>
+              <Flex justify="space-between" mb={2}>
+                <Text fontSize="sm" fontWeight="medium">
+                  Progress: {Math.round(calculateProgress())}%
+                </Text>
+                <Text fontSize="sm" color="gray.500">
+                  Section {currentSectionIndex + 1} of {lesson.content.length}
+                </Text>
+              </Flex>
+              <Progress 
+                value={calculateProgress()} 
+                size="lg" 
+                colorScheme="brand" 
+                hasStripe 
+                isAnimated
+                borderRadius="full"
+                bg="gray.100"
+              />
+            </Box>
+          </VStack>
+        </CardHeader>
+      </Card>
       
       {/* Navigation controls - top */}
-      <Flex justify="space-between" mb={4}>
+      <Flex justify="space-between" mb={6} align="center">
         <Button 
           leftIcon={<ChevronLeftIcon />} 
           onClick={() => navigateToSection(currentSectionIndex - 1)}
           isDisabled={isFirstSection}
           variant="outline"
+          size="lg"
         >
           Previous
         </Button>
+        
         <ProgressTracker 
           totalSections={lesson.content.length} 
           currentSection={currentSectionIndex + 1} 
           onSectionClick={(index) => navigateToSection(index - 1)} 
         />
+        
         <Button 
           rightIcon={<ChevronRightIcon />} 
           onClick={() => navigateToSection(currentSectionIndex + 1)}
           isDisabled={isLastSection}
           colorScheme="brand"
+          size="lg"
         >
           Next
         </Button>
       </Flex>
       
-      {/* Current section content */}
-      <Box bg={cardBg} p={6} borderRadius="md" mb={6} boxShadow="sm">
-        <LessonSection 
-          title={currentSection.title} 
-          content={currentSection.content}
-          type={currentSection.type}
-          mediaUrl={currentSection.media_url}
-        />
-      </Box>
+      {/* Current section content - Enhanced */}
+      <Card bg={cardBg} mb={8} boxShadow="lg" borderRadius="xl">
+        <CardBody p={8}>
+          <LessonSection 
+            title={currentSection.title} 
+            content={currentSection.content}
+            type={currentSection.type}
+            mediaUrl={currentSection.media_url}
+          />
+        </CardBody>
+      </Card>
       
-      {/* Exercises - shown on the last section */}
+      {/* Exercises - Enhanced */}
       {isLastSection && lesson.exercises.length > 0 && (
-        <Box bg={cardBg} p={6} borderRadius="md" mb={6} boxShadow="sm">
-          <Heading as="h2" size="lg" mb={4}>Exercises</Heading>
-          <VStack spacing={6} align="stretch">
-            {lesson.exercises.map((exercise, index) => (
-              <ExerciseComponent
-                key={index}
-                exercise={exercise}
-                index={index}
-                selectedAnswer={exerciseAnswers[index]}
-                onAnswerSelect={(answer) => handleAnswerSelect(index, answer)}
-              />
-            ))}
-          </VStack>
-        </Box>
+        <Card bg={cardBg} mb={8} boxShadow="lg" borderRadius="xl">
+          <CardHeader>
+            <Heading as="h2" size="xl" color="brand.600" display="flex" alignItems="center">
+              <Icon as={FiFileText} mr={3} />
+              Practice Exercises
+            </Heading>
+            <Text color="gray.600" mt={2}>
+              Test your understanding with these exercises
+            </Text>
+          </CardHeader>
+          <CardBody pt={0}>
+            <VStack spacing={8} align="stretch">
+              {lesson.exercises.map((exercise, index) => (
+                <ExerciseComponent
+                  key={index}
+                  exercise={exercise}
+                  index={index}
+                  selectedAnswer={exerciseAnswers[index]}
+                  onAnswerSelect={(answer) => handleAnswerSelect(index, answer)}
+                />
+              ))}
+            </VStack>
+          </CardBody>
+        </Card>
       )}
       
-      {/* Resources */}
+      {/* Resources - Enhanced */}
       {lesson.resources.length > 0 && (
-        <Box bg={cardBg} p={6} borderRadius="md" mb={6} boxShadow="sm">
-          <Heading as="h2" size="lg" mb={4}>Additional Resources</Heading>
-          <VStack spacing={3} align="stretch">
-            {lesson.resources.map((resource, index) => (
-              <Box key={index} p={3} borderWidth={1} borderRadius="md">
-                <Heading as="h3" size="sm">{resource.title}</Heading>
-                {resource.description && (
-                  <Text fontSize="sm" color="gray.600" mt={1}>{resource.description}</Text>
-                )}
-                <Button 
-                  as="a" 
-                  href={resource.url} 
-                  target="_blank" 
-                  size="sm" 
-                  colorScheme="blue" 
-                  variant="link" 
-                  mt={2}
+        <Card bg={cardBg} mb={8} boxShadow="lg" borderRadius="xl">
+          <CardHeader>
+            <Heading as="h2" size="xl" color="brand.600" display="flex" alignItems="center">
+              <Icon as={FiExternalLink} mr={3} />
+              Additional Resources
+            </Heading>
+            <Text color="gray.600" mt={2}>
+              Explore these resources to deepen your understanding
+            </Text>
+          </CardHeader>
+          <CardBody pt={0}>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+              {lesson.resources.map((resource, index) => (
+                <Box 
+                  key={index} 
+                  p={6} 
+                  borderWidth={2} 
+                  borderRadius="xl" 
+                  borderColor="gray.200"
+                  bg={contentBg}
+                  transition="all 0.2s"
+                  _hover={{ 
+                    borderColor: 'brand.300',
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'md'
+                  }}
                 >
-                  Open Resource
-                </Button>
-              </Box>
-            ))}
-          </VStack>
-        </Box>
+                  <VStack align="stretch" spacing={4}>
+                    <Heading as="h3" size="md" color="brand.600">
+                      {resource.title}
+                    </Heading>
+                    {resource.description && (
+                      <Text fontSize="sm" color="gray.600" lineHeight="tall">
+                        {resource.description}
+                      </Text>
+                    )}
+                    <Link 
+                      href={resource.url} 
+                      isExternal
+                      color="brand.500"
+                      fontWeight="semibold"
+                      display="flex"
+                      alignItems="center"
+                      _hover={{ color: 'brand.600' }}
+                    >
+                      <Icon as={FiExternalLink} mr={2} />
+                      Open Resource
+                    </Link>
+                  </VStack>
+                </Box>
+              ))}
+            </SimpleGrid>
+          </CardBody>
+        </Card>
       )}
       
       {/* Navigation controls - bottom */}
-      <Flex justify="space-between" mt={6}>
+      <Flex justify="space-between" mt={8}>
         <Button 
           leftIcon={<ChevronLeftIcon />} 
           onClick={() => navigateToSection(currentSectionIndex - 1)}
           isDisabled={isFirstSection}
           variant="outline"
+          size="lg"
         >
           Previous
         </Button>
         
-        <HStack>
-          <Button onClick={() => saveProgress()} colorScheme="gray">
+        <HStack spacing={4}>
+          <Button onClick={() => saveProgress()} colorScheme="gray" size="lg">
             Save Progress
           </Button>
           {isLastSection && (
-            <Button onClick={completeLesson} colorScheme="green">
+            <Button onClick={completeLesson} colorScheme="green" size="lg">
               Complete Lesson
             </Button>
           )}
@@ -479,6 +545,7 @@ const Lesson: React.FC = () => {
           onClick={() => navigateToSection(currentSectionIndex + 1)}
           isDisabled={isLastSection}
           colorScheme="brand"
+          size="lg"
         >
           Next
         </Button>

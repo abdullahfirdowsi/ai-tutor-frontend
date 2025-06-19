@@ -9,6 +9,9 @@ import {
   Divider,
   Badge,
   Tooltip,
+  IconButton,
+  Collapse,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { 
@@ -18,7 +21,9 @@ import {
   FiUser, 
   FiTrendingUp,
   FiSettings,
-  FiBookmark
+  FiBookmark,
+  FiChevronLeft,
+  FiChevronRight
 } from 'react-icons/fi';
 import api from '../../services/api';
 
@@ -29,17 +34,17 @@ interface NavItemProps {
   isActive: boolean;
   badge?: string | number;
   tooltip?: string;
+  isCollapsed?: boolean;
 }
 
 interface SidebarCounts {
-  userLessons: number; // User's created lessons
-  availableLessons: number; // Total available lessons
-  userQuestions: number; // User's Q&A history
-  completedLessons: number; // User's completed lessons
+  userLessons: number;
+  availableLessons: number;
+  userQuestions: number;
+  completedLessons: number;
 }
 
-const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps) => {
-  // Move all hooks to the top
+const NavItem = ({ icon, children, to, isActive, badge, tooltip, isCollapsed }: NavItemProps) => {
   const activeBg = useColorModeValue('brand.50', 'brand.900');
   const activeColor = useColorModeValue('brand.600', 'brand.300');
   const textColor = useColorModeValue('gray.600', 'gray.300');
@@ -71,6 +76,7 @@ const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps)
           transform: 'translateX(2px)',
         }}
         position="relative"
+        justify={isCollapsed ? 'center' : 'flex-start'}
       >
         {isActive && (
           <Box
@@ -85,33 +91,41 @@ const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps)
         )}
         
         <Icon
-          mr="3"
+          mr={isCollapsed ? "0" : "3"}
           fontSize="18"
           as={icon}
           transition="all 0.2s"
         />
         
-        <Text fontSize="sm" flex="1">
-          {children}
-        </Text>
-        
-        {badge && (
-          <Badge
-            colorScheme={isActive ? 'brand' : 'gray'}
-            variant="subtle"
-            borderRadius="full"
-            fontSize="xs"
-            minW="20px"
-            textAlign="center"
-          >
-            {badge}
-          </Badge>
+        {!isCollapsed && (
+          <>
+            <Text fontSize="sm" flex="1">
+              {children}
+            </Text>
+            
+            {badge && (
+              <Badge
+                colorScheme={isActive ? 'brand' : 'gray'}
+                variant="subtle"
+                borderRadius="full"
+                fontSize="xs"
+                minW="20px"
+                textAlign="center"
+              >
+                {badge}
+              </Badge>
+            )}
+          </>
         )}
       </Flex>
     </Box>
   );
 
-  return tooltip ? (
+  return tooltip && isCollapsed ? (
+    <Tooltip label={`${children}${badge ? ` (${badge})` : ''}`} placement="right" hasArrow>
+      {content}
+    </Tooltip>
+  ) : tooltip ? (
     <Tooltip label={tooltip} placement="right" hasArrow>
       {content}
     </Tooltip>
@@ -120,6 +134,7 @@ const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps)
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const { isOpen: isCollapsed, onToggle } = useDisclosure();
   const [counts, setCounts] = useState<SidebarCounts>({
     userLessons: 0,
     availableLessons: 0,
@@ -128,7 +143,6 @@ const Sidebar: React.FC = () => {
   });
   const [userProgress, setUserProgress] = useState<any>(null);
   
-  // Move all hooks to the top
   const sidebarBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const labelColor = useColorModeValue('gray.500', 'gray.400');
@@ -141,29 +155,23 @@ const Sidebar: React.FC = () => {
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        // Fetch user's progress first
         const progressResponse = await api.get('/users/me/progress');
         const progressData = progressResponse.data;
         setUserProgress(progressData);
 
-        // Get completed lessons count
         const completedLessons = progressData?.completed_lessons?.length || 0;
 
-        // Fetch user's Q&A history count
         const qaResponse = await api.get('/qa/history?limit=1');
         const userQuestions = qaResponse.data.total || 0;
 
-        // Fetch total available lessons (all lessons in system)
         const lessonsResponse = await api.get('/lessons?limit=1');
         const availableLessons = lessonsResponse.data.total || 0;
 
-        // Try to fetch user's created lessons (if endpoint exists)
         let userLessons = 0;
         try {
           const userLessonsResponse = await api.get('/lessons/my-lessons?limit=1');
           userLessons = userLessonsResponse.data.total || 0;
         } catch (error) {
-          // If endpoint doesn't exist, we'll show available lessons instead
           console.warn('User-specific lessons endpoint not available');
         }
 
@@ -175,15 +183,11 @@ const Sidebar: React.FC = () => {
         });
       } catch (error) {
         console.warn('Failed to fetch sidebar counts:', error);
-        // Keep default values (0) on error
       }
     };
 
     fetchCounts();
-    
-    // Refresh counts every 30 seconds
     const interval = setInterval(fetchCounts, 30000);
-    
     return () => clearInterval(interval);
   }, []);
 
@@ -194,45 +198,61 @@ const Sidebar: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
-  // Calculate weekly progress
   const weeklyProgress = userProgress?.statistics?.completed_this_week || 0;
   const weeklyGoal = userProgress?.statistics?.weekly_goal || 7;
   const progressPercentage = weeklyGoal > 0 ? (weeklyProgress / weeklyGoal) * 100 : 0;
+
+  const sidebarWidth = isCollapsed ? '80px' : '240px';
 
   return (
     <Box
       position="fixed"
       height="calc(100vh - 72px)"
-      w={{ base: 'full', md: '280px' }}
+      w={{ base: 'full', md: sidebarWidth }}
       display={{ base: 'none', md: 'block' }}
       bg={sidebarBg}
       borderRight="1px"
       borderRightColor={borderColor}
-      pt={6}
+      pt={4}
       pb={4}
       overflowY="auto"
       boxShadow="sm"
+      transition="width 0.3s ease"
     >
-      <VStack spacing={6} align="stretch" px={4}>
+      <VStack spacing={4} align="stretch" px={2}>
+        {/* Collapse Toggle */}
+        <Flex justify={isCollapsed ? 'center' : 'flex-end'} px={2}>
+          <IconButton
+            aria-label="Toggle sidebar"
+            icon={<Icon as={isCollapsed ? FiChevronRight : FiChevronLeft} />}
+            size="sm"
+            variant="ghost"
+            onClick={onToggle}
+          />
+        </Flex>
+
         {/* Main Navigation */}
         <Box>
-          <Text
-            fontSize="xs"
-            fontWeight="bold"
-            color={labelColor}
-            textTransform="uppercase"
-            letterSpacing="wide"
-            mb={3}
-            px={2}
-          >
-            Main
-          </Text>
+          {!isCollapsed && (
+            <Text
+              fontSize="xs"
+              fontWeight="bold"
+              color={labelColor}
+              textTransform="uppercase"
+              letterSpacing="wide"
+              mb={3}
+              px={2}
+            >
+              Main
+            </Text>
+          )}
           <VStack spacing={1} align="stretch">
             <NavItem 
               icon={FiHome} 
               to="/" 
               isActive={isActive('/')}
-              tooltip="Your learning dashboard"
+              tooltip="Dashboard"
+              isCollapsed={isCollapsed}
             >
               Dashboard
             </NavItem>
@@ -242,7 +262,8 @@ const Sidebar: React.FC = () => {
               to="/lessons" 
               isActive={isActive('/lessons')}
               badge={counts.availableLessons > 0 ? counts.availableLessons : undefined}
-              tooltip={`${counts.availableLessons} lessons available to study`}
+              tooltip={`${counts.availableLessons} lessons available`}
+              isCollapsed={isCollapsed}
             >
               Lessons
             </NavItem>
@@ -252,34 +273,38 @@ const Sidebar: React.FC = () => {
               to="/qa" 
               isActive={isActive('/qa')}
               badge={counts.userQuestions > 0 ? counts.userQuestions : undefined}
-              tooltip={`${counts.userQuestions} questions in your history`}
+              tooltip={`${counts.userQuestions} questions asked`}
+              isCollapsed={isCollapsed}
             >
               Q&A
             </NavItem>
           </VStack>
         </Box>
 
-        <Divider />
+        {!isCollapsed && <Divider />}
 
-        {/* Learning Progress */}
+        {/* Progress */}
         <Box>
-          <Text
-            fontSize="xs"
-            fontWeight="bold"
-            color={labelColor}
-            textTransform="uppercase"
-            letterSpacing="wide"
-            mb={3}
-            px={2}
-          >
-            Progress
-          </Text>
+          {!isCollapsed && (
+            <Text
+              fontSize="xs"
+              fontWeight="bold"
+              color={labelColor}
+              textTransform="uppercase"
+              letterSpacing="wide"
+              mb={3}
+              px={2}
+            >
+              Progress
+            </Text>
+          )}
           <VStack spacing={1} align="stretch">
             <NavItem 
               icon={FiTrendingUp} 
               to="/analytics" 
               isActive={isActive('/analytics')}
-              tooltip="View detailed learning analytics"
+              tooltip="Analytics"
+              isCollapsed={isCollapsed}
             >
               Analytics
             </NavItem>
@@ -289,34 +314,38 @@ const Sidebar: React.FC = () => {
               to="/completed" 
               isActive={isActive('/completed')}
               badge={counts.completedLessons > 0 ? counts.completedLessons : undefined}
-              tooltip={`${counts.completedLessons} lessons completed`}
+              tooltip={`${counts.completedLessons} completed`}
+              isCollapsed={isCollapsed}
             >
               Completed
             </NavItem>
           </VStack>
         </Box>
 
-        <Divider />
+        {!isCollapsed && <Divider />}
 
         {/* Account */}
         <Box>
-          <Text
-            fontSize="xs"
-            fontWeight="bold"
-            color={labelColor}
-            textTransform="uppercase"
-            letterSpacing="wide"
-            mb={3}
-            px={2}
-          >
-            Account
-          </Text>
+          {!isCollapsed && (
+            <Text
+              fontSize="xs"
+              fontWeight="bold"
+              color={labelColor}
+              textTransform="uppercase"
+              letterSpacing="wide"
+              mb={3}
+              px={2}
+            >
+              Account
+            </Text>
+          )}
           <VStack spacing={1} align="stretch">
             <NavItem 
               icon={FiUser} 
               to="/profile" 
               isActive={isActive('/profile')}
-              tooltip="Manage your profile and settings"
+              tooltip="Profile"
+              isCollapsed={isCollapsed}
             >
               Profile
             </NavItem>
@@ -325,26 +354,27 @@ const Sidebar: React.FC = () => {
               icon={FiSettings} 
               to="/settings" 
               isActive={isActive('/settings')}
-              tooltip="App preferences and configuration"
+              tooltip="Settings"
+              isCollapsed={isCollapsed}
             >
               Settings
             </NavItem>
           </VStack>
         </Box>
 
-        {/* Weekly Goal Progress */}
-        {userProgress && (
+        {/* Weekly Goal Progress - only show when expanded */}
+        {!isCollapsed && userProgress && (
           <Box
             bg={progressBg}
-            p={4}
+            p={3}
             borderRadius="lg"
             mx={2}
           >
-            <Text fontSize="sm" fontWeight="600" mb={2} color={progressTextColor}>
+            <Text fontSize="xs" fontWeight="600" mb={2} color={progressTextColor}>
               Weekly Goal
             </Text>
-            <Text fontSize="xs" color={progressSubColor} mb={3}>
-              {weeklyProgress} of {weeklyGoal} lessons
+            <Text fontSize="xs" color={progressSubColor} mb={2}>
+              {weeklyProgress}/{weeklyGoal}
             </Text>
             <Box
               w="full"
@@ -361,9 +391,6 @@ const Sidebar: React.FC = () => {
                 transition="width 0.3s ease"
               />
             </Box>
-            <Text fontSize="xs" color={progressSubColor} mt={2}>
-              {Math.round(progressPercentage)}% complete
-            </Text>
           </Box>
         )}
       </VStack>

@@ -10,7 +10,15 @@ const MainLayout: React.FC = () => {
       <Navbar />
       <Flex>
         <Sidebar />
-        <Box flex="1" p={4} ml={{ base: 0, md: '280px' }}>
+        <Box 
+          flex="1" 
+          p={4} 
+          ml={{ base: 0, md: '240px' }} // Default width, will be overridden by sidebar state
+          transition="margin-left 0.3s ease"
+          style={{
+            marginLeft: 'var(--sidebar-width, 240px)'
+          }}
+        >
           <Outlet />
         </Box>
       </Flex>
