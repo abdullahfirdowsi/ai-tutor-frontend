@@ -5,7 +5,6 @@ import {
   Text,
   IconButton,
   Button,
-  Stack,
   Collapse,
   useColorModeValue,
   useBreakpointValue,
@@ -28,7 +27,7 @@ import {
   ChevronDownIcon,
   BellIcon 
 } from '@chakra-ui/icons';
-import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Navbar: React.FC = () => {
@@ -36,7 +35,6 @@ const Navbar: React.FC = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Move all hooks to the top
   const bg = useColorModeValue('white', 'gray.800');
@@ -53,8 +51,6 @@ const Navbar: React.FC = () => {
       console.error('Error logging out:', error);
     }
   };
-
-  const isActive = (path: string) => location.pathname === path;
 
   return (
     <Box>
@@ -120,27 +116,8 @@ const Navbar: React.FC = () => {
           </HStack>
         </Flex>
 
-        {/* Desktop Navigation */}
-        <HStack
-          spacing={8}
-          display={{ base: 'none', md: 'flex' }}
-          flex={1}
-          justify="center"
-        >
-          <NavLink to="/" isActive={isActive('/')}>Dashboard</NavLink>
-          <NavLink to="/lessons" isActive={isActive('/lessons') || location.pathname.startsWith('/lessons')}>
-            Lessons
-          </NavLink>
-          <NavLink to="/qa" isActive={isActive('/qa')}>Q&A</NavLink>
-        </HStack>
-
-        <Stack
-          flex={{ base: 1, md: 0 }}
-          justify={'flex-end'}
-          direction={'row'}
-          spacing={4}
-          align="center"
-        >
+        {/* Right side - only user actions, no navigation menu */}
+        <HStack spacing={4} justify="flex-end">
           {/* Notifications */}
           <Tooltip label="Notifications" hasArrow>
             <IconButton
@@ -210,7 +187,7 @@ const Navbar: React.FC = () => {
               </MenuList>
             </Menu>
           )}
-        </Stack>
+        </HStack>
       </Flex>
 
       <Collapse in={isOpen} animateOpacity>
@@ -223,92 +200,23 @@ const Navbar: React.FC = () => {
   );
 };
 
-interface NavLinkProps {
-  to: string;
-  children: React.ReactNode;
-  isActive: boolean;
-}
-
-const NavLink: React.FC<NavLinkProps> = ({ to, children, isActive }) => {
-  // Move hooks to the top
-  const activeColor = useColorModeValue('brand.600', 'brand.300');
-  const hoverColor = useColorModeValue('brand.500', 'brand.400');
-  const inactiveColor = useColorModeValue('gray.600', 'gray.300');
-  const hoverBg = useColorModeValue('gray.100', 'gray.700');
-  
-  return (
-    <Text
-      as={RouterLink}
-      to={to}
-      px={3}
-      py={2}
-      borderRadius="md"
-      fontWeight={isActive ? '600' : '500'}
-      color={isActive ? activeColor : inactiveColor}
-      _hover={{
-        textDecoration: 'none',
-        color: hoverColor,
-        bg: hoverBg,
-      }}
-      transition="all 0.2s"
-    >
-      {children}
-    </Text>
-  );
-};
-
 const MobileNav: React.FC = () => {
-  const location = useLocation();
-  
   // Move hooks to the top
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   
-  const isActive = (path: string) => location.pathname === path;
-
   return (
-    <Stack
+    <Box
       bg={bg}
       p={4}
       display={{ md: 'none' }}
       borderBottom={1}
       borderColor={borderColor}
-      spacing={4}
     >
-      <MobileNavLink to="/" isActive={isActive('/')}>Dashboard</MobileNavLink>
-      <MobileNavLink to="/lessons" isActive={isActive('/lessons')}>Lessons</MobileNavLink>
-      <MobileNavLink to="/qa" isActive={isActive('/qa')}>Q&A</MobileNavLink>
-      <MobileNavLink to="/profile" isActive={isActive('/profile')}>Profile</MobileNavLink>
-    </Stack>
-  );
-};
-
-interface MobileNavLinkProps {
-  to: string;
-  children: React.ReactNode;
-  isActive: boolean;
-}
-
-const MobileNavLink: React.FC<MobileNavLinkProps> = ({ to, children, isActive }) => {
-  // Move hooks to the top
-  const activeColor = useColorModeValue('brand.600', 'brand.300');
-  const inactiveColor = useColorModeValue('gray.600', 'gray.300');
-  const hoverColor = useColorModeValue('brand.500', 'brand.400');
-  
-  return (
-    <Text
-      as={RouterLink}
-      to={to}
-      py={2}
-      fontWeight={isActive ? '600' : '500'}
-      color={isActive ? activeColor : inactiveColor}
-      _hover={{
-        textDecoration: 'none',
-        color: hoverColor,
-      }}
-    >
-      {children}
-    </Text>
+      <Text fontSize="sm" color="gray.500" textAlign="center">
+        Use the sidebar for navigation on larger screens
+      </Text>
+    </Box>
   );
 };
 

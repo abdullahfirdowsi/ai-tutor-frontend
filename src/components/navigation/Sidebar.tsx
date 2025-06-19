@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Flex,
@@ -20,6 +20,7 @@ import {
   FiSettings,
   FiBookmark
 } from 'react-icons/fi';
+import api from '../../services/api';
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -28,6 +29,12 @@ interface NavItemProps {
   isActive: boolean;
   badge?: string | number;
   tooltip?: string;
+}
+
+interface SidebarCounts {
+  totalLessons: number;
+  pendingQuestions: number;
+  bookmarks: number;
 }
 
 const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps) => {
@@ -112,6 +119,12 @@ const NavItem = ({ icon, children, to, isActive, badge, tooltip }: NavItemProps)
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const [counts, setCounts] = useState<SidebarCounts>({
+    totalLessons: 0,
+    pendingQuestions: 0,
+    bookmarks: 0,
+  });
+  const [userProgress, setUserProgress] = useState<any>(null);
   
   // Move all hooks to the top
   const sidebarBg = useColorModeValue('white', 'gray.800');
@@ -122,12 +135,55 @@ const Sidebar: React.FC = () => {
   const progressSubColor = useColorModeValue('gray.600', 'gray.400');
   const progressBarBg = useColorModeValue('brand.100', 'brand.800');
 
+  // Fetch real-time counts
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        // Fetch lessons count
+        const lessonsResponse = await api.get('/lessons?limit=1');
+        const totalLessons = lessonsResponse.data.total || 0;
+
+        // Fetch Q&A history count (pending/recent questions)
+        const qaResponse = await api.get('/qa/history?limit=1');
+        const pendingQuestions = qaResponse.data.total || 0;
+
+        // Fetch user progress for bookmarks/saved items
+        const progressResponse = await api.get('/users/me/progress');
+        setUserProgress(progressResponse.data);
+        
+        // For now, use completed lessons as bookmarks count
+        const bookmarks = progressResponse.data?.completed_lessons?.length || 0;
+
+        setCounts({
+          totalLessons,
+          pendingQuestions,
+          bookmarks,
+        });
+      } catch (error) {
+        console.warn('Failed to fetch sidebar counts:', error);
+        // Keep default values (0) on error
+      }
+    };
+
+    fetchCounts();
+    
+    // Refresh counts every 30 seconds
+    const interval = setInterval(fetchCounts, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const isActive = (path: string) => {
     if (path === '/') {
       return location.pathname === '/';
     }
     return location.pathname.startsWith(path);
   };
+
+  // Calculate weekly progress
+  const weeklyProgress = userProgress?.statistics?.completed_this_week || 0;
+  const weeklyGoal = userProgress?.statistics?.weekly_goal || 7;
+  const progressPercentage = weeklyGoal > 0 ? (weeklyProgress / weeklyGoal) * 100 : 0;
 
   return (
     <Box
@@ -162,7 +218,7 @@ const Sidebar: React.FC = () => {
               icon={FiHome} 
               to="/" 
               isActive={isActive('/')}
-              tooltip="View your learning dashboard"
+              tooltip="Your learning dashboard"
             >
               Dashboard
             </NavItem>
@@ -171,7 +227,7 @@ const Sidebar: React.FC = () => {
               icon={FiBook} 
               to="/lessons" 
               isActive={isActive('/lessons')}
-              badge="12"
+              badge={counts.totalLessons > 0 ? counts.totalLessons : undefined}
               tooltip="Browse and take lessons"
             >
               Lessons
@@ -181,10 +237,10 @@ const Sidebar: React.FC = () => {
               icon={FiHelpCircle} 
               to="/qa" 
               isActive={isActive('/qa')}
-              badge="3"
+              badge={counts.pendingQuestions > 0 ? counts.pendingQuestions : undefined}
               tooltip="Ask questions and get AI help"
             >
-              Q&A Assistant
+              Q&A
             </NavItem>
           </VStack>
         </Box>
@@ -202,7 +258,7 @@ const Sidebar: React.FC = () => {
             mb={3}
             px={2}
           >
-            Learning Tools
+            Tools
           </Text>
           <VStack spacing={1} align="stretch">
             <NavItem 
@@ -218,10 +274,10 @@ const Sidebar: React.FC = () => {
               icon={FiBookmark} 
               to="/bookmarks" 
               isActive={isActive('/bookmarks')}
-              badge="5"
-              tooltip="Your saved lessons and notes"
+              badge={counts.bookmarks > 0 ? counts.bookmarks : undefined}
+              tooltip="Your completed lessons"
             >
-              Bookmarks
+              Completed
             </NavItem>
           </VStack>
         </Box>
@@ -263,34 +319,36 @@ const Sidebar: React.FC = () => {
         </Box>
 
         {/* Progress Summary */}
-        <Box
-          bg={progressBg}
-          p={4}
-          borderRadius="lg"
-          mx={2}
-        >
-          <Text fontSize="sm" fontWeight="600" mb={2} color={progressTextColor}>
-            Weekly Progress
-          </Text>
-          <Text fontSize="xs" color={progressSubColor} mb={3}>
-            5 of 7 lessons completed
-          </Text>
+        {userProgress && (
           <Box
-            w="full"
-            h="2"
-            bg={progressBarBg}
-            borderRadius="full"
-            overflow="hidden"
+            bg={progressBg}
+            p={4}
+            borderRadius="lg"
+            mx={2}
           >
+            <Text fontSize="sm" fontWeight="600" mb={2} color={progressTextColor}>
+              Weekly Goal
+            </Text>
+            <Text fontSize="xs" color={progressSubColor} mb={3}>
+              {weeklyProgress} of {weeklyGoal} lessons
+            </Text>
             <Box
-              w="71%"
-              h="full"
-              bg="brand.500"
+              w="full"
+              h="2"
+              bg={progressBarBg}
               borderRadius="full"
-              transition="width 0.3s ease"
-            />
+              overflow="hidden"
+            >
+              <Box
+                w={`${Math.min(progressPercentage, 100)}%`}
+                h="full"
+                bg="brand.500"
+                borderRadius="full"
+                transition="width 0.3s ease"
+              />
+            </Box>
           </Box>
-        </Box>
+        )}
       </VStack>
     </Box>
   );
