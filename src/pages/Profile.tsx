@@ -40,9 +40,7 @@ import {
   FiHelpCircle, 
   FiTrendingUp, 
   FiAward,
-  FiTarget,
-  FiWifi,
-  FiRefreshCw
+  FiTarget
 } from 'react-icons/fi';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
