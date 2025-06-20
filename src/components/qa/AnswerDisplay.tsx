@@ -128,7 +128,7 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({
           size="sm"
           name="AI Tutor"
           bg="brand.500"
-          src="/aitutor.png"
+          src="/aitutor-nobackground.png"
           mr={3}
         />
         <Box

@@ -61,7 +61,7 @@ const AuthLayout: React.FC = () => {
             <VStack spacing={4} align={{ base: 'center', lg: 'start' }}>
               <HStack spacing={3}>
                 <Image
-                  src="/aitutor.png"
+                  src="/aitutor-nobackground.png"
                   alt="AI Tutor Logo"
                   w="80px"
                   h="80px"
