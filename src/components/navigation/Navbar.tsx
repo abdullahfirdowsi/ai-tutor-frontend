@@ -89,10 +89,10 @@ const Navbar: React.FC = () => {
         <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }} align="center">
           <HStack spacing={3}>
             <Image
-              src="/logo.png"
+              src="/aitutor.png"
               alt="AI Tutor Logo"
-              w="40px"
-              h="40px"
+              w="50px"
+              h="50px"
               borderRadius="lg"
             />
             <Text
