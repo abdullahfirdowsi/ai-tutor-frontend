@@ -72,11 +72,15 @@ interface UserProgress {
   last_active?: string;
 }
 
-interface RecentActivity {
+// Define data types
+interface ActivityItemData {
   type: string;
   title: string;
   time: string;
   score?: number;
+  details?: string;
+  lesson_id?: string;
+  time_spent?: number;
 }
 
 interface RecommendedLesson {
@@ -89,7 +93,7 @@ interface RecommendedLesson {
 const Dashboard: React.FC = () => {
   const { currentUser } = useAuth();
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+const [recentActivity, setRecentActivity] = useState<ActivityItemData[]>([]);
   const [recommendedLessons, setRecommendedLessons] = useState<RecommendedLesson[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -116,7 +120,14 @@ const Dashboard: React.FC = () => {
         // Fetch recent activity
         try {
           const activityResponse = await api.get('/users/me/activity?limit=5');
-          setRecentActivity(activityResponse.data.activities || []);
+          const mappedActivities: ActivityItemData[] = (activityResponse.data.activities || []).map((activity: any) => ({
+            type: activity.type,
+            title: activity.title || activity.details,
+            time: activity.date,  // Backend sends date instead of time
+            score: activity.score,
+            details: activity.details
+          }));
+          setRecentActivity(mappedActivities);
         } catch (activityError) {
           console.warn('No recent activity available:', activityError);
           setRecentActivity([]);
@@ -125,7 +136,8 @@ const Dashboard: React.FC = () => {
         // Fetch recommended lessons
         try {
           const recommendedResponse = await api.get('/lessons/recommended?limit=3');
-          setRecommendedLessons(recommendedResponse.data.lessons || []);
+          const mappedLessons = recommendedResponse.data.lessons || [];
+          setRecommendedLessons(mappedLessons);
         } catch (recommendedError) {
           console.warn('No recommended lessons available:', recommendedError);
           setRecommendedLessons([]);
@@ -148,6 +160,7 @@ const Dashboard: React.FC = () => {
     const mins = minutes % 60;
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
+  // Utility functions
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -385,7 +398,7 @@ const Dashboard: React.FC = () => {
               {recentActivity.length > 0 ? (
                 <VStack spacing={4} align="stretch">
                   {recentActivity.map((activity, index) => (
-                    <ActivityItem key={index} activity={activity} />
+                    <ActivityItemDisplay key={index} activity={activity} />
                   ))}
                 </VStack>
               ) : (
@@ -548,18 +561,36 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value, helpText, color
   );
 };
 
-interface ActivityItemProps {
-  activity: {
-    type: string;
-    title: string;
-    time: string;
-    score?: number;
-  };
+interface ActivityItemDisplayProps {
+  activity: ActivityItemData;
 }
 
-const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
+// Activity item component for displaying recent activities
+const ActivityItemDisplay: React.FC<ActivityItemDisplayProps> = ({ activity }) => {
   const textColor = useColorModeValue('gray.800', 'gray.100');
   const mutedTextColor = useColorModeValue('gray.500', 'gray.500');
+  
+  // Format activity time (date string) to relative time
+  const formatActivityTime = (timeOrDate: string): string => {
+    try {
+      const date = new Date(timeOrDate);
+      if (isNaN(date.getTime())) {
+        return timeOrDate; // Return as-is if invalid date
+      }
+      
+      const now = new Date();
+      const diffInHours = Math.abs(now.getTime() - date.getTime()) / 36e5;
+      
+      if (diffInHours < 24) {
+        const hours = Math.round(diffInHours);
+        return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+      } else {
+        return date.toLocaleDateString();
+      }
+    } catch (e) {
+      return timeOrDate; // Return as-is if parsing fails
+    }
+  };
   
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -580,8 +611,12 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
     <HStack spacing={3} p={3} borderRadius="xl" _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}>
       <Icon as={icon} color={color} boxSize={5} />
       <VStack align="start" spacing={0} flex={1}>
-        <Text fontWeight="medium" fontSize="sm" color={textColor}>{activity.title}</Text>
-        <Text fontSize="xs" color={mutedTextColor}>{activity.time}</Text>
+        <Text fontWeight="medium" fontSize="sm" color={textColor}>
+          {activity.title || activity.details}
+        </Text>
+        <Text fontSize="xs" color={mutedTextColor}>
+          {formatActivityTime(activity.time)}
+        </Text>
       </VStack>
       {activity.score && (
         <Badge variant="gradient" borderRadius="full">

@@ -110,7 +110,10 @@ const QAInterface: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Failed to fetch sessions:', err);
-      setHasError(true);
+      // Only set error if it's not a 404 (which would just mean no sessions yet)
+      if (err.response?.status !== 404) {
+        setHasError(true);
+      }
       setSessions([]);
     } finally {
       setIsLoadingSessions(false);
@@ -171,8 +174,14 @@ const QAInterface: React.FC = () => {
       
       return newSession;
     } catch (error: any) {
-      console.error('Error creating session:', error);
-      throw new Error('Failed to create conversation. Please check your connection and try again.');
+      // Check for specific error types
+      if (error.response?.status === 405) {
+        console.error('Method not allowed for sessions:', error);
+        throw new Error('QA sessions are not supported in the current configuration');
+      } else {
+        console.error('Error creating session:', error);
+        throw new Error('Failed to create conversation. Please check your connection and try again.');
+      }
     }
   };
   
