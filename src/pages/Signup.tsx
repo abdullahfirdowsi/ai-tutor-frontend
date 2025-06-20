@@ -17,6 +17,7 @@ import {
   HStack,
   Checkbox,
   Progress,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -39,6 +40,10 @@ const Signup: React.FC = () => {
   const { signup } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
+  
+  // Color mode values
+  const textColor = useColorModeValue('gray.800', 'gray.100');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
   
   const { 
     register, 
@@ -105,8 +110,8 @@ const Signup: React.FC = () => {
     <VStack spacing={8} align="stretch">
       {/* Header */}
       <VStack spacing={2} textAlign="center">
-        <Heading size="lg">Create your account</Heading>
-        <Text color="gray.600">
+        <Heading size="lg" color={textColor}>Create your account</Heading>
+        <Text color={mutedTextColor}>
           Join thousands of learners on AI Tutor Pro
         </Text>
       </VStack>
@@ -117,7 +122,7 @@ const Signup: React.FC = () => {
       {/* Divider */}
       <HStack>
         <Divider />
-        <Text fontSize="sm" color="gray.500" px={3}>
+        <Text fontSize="sm" color={mutedTextColor} px={3}>
           or
         </Text>
         <Divider />
@@ -127,7 +132,7 @@ const Signup: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <VStack spacing={6}>
           <FormControl id="name" isInvalid={!!errors.name}>
-            <FormLabel>Full Name</FormLabel>
+            <FormLabel color={textColor}>Full Name</FormLabel>
             <InputGroup>
               <Input
                 type="text"
@@ -153,7 +158,7 @@ const Signup: React.FC = () => {
           </FormControl>
           
           <FormControl id="email" isInvalid={!!errors.email}>
-            <FormLabel>Email address</FormLabel>
+            <FormLabel color={textColor}>Email address</FormLabel>
             <InputGroup>
               <Input
                 type="email"
@@ -175,7 +180,7 @@ const Signup: React.FC = () => {
           </FormControl>
           
           <FormControl id="password" isInvalid={!!errors.password}>
-            <FormLabel>Password</FormLabel>
+            <FormLabel color={textColor}>Password</FormLabel>
             <InputGroup>
               <Input
                 type={showPassword ? 'text' : 'password'}
@@ -208,7 +213,7 @@ const Signup: React.FC = () => {
             {watchPassword && (
               <VStack mt={2} align="stretch">
                 <HStack justify="space-between" mb={1}>
-                  <Text fontSize="xs" color="gray.500">Password strength</Text>
+                  <Text fontSize="xs" color={mutedTextColor}>Password strength</Text>
                   <Text fontSize="xs" color={`${getPasswordStrengthColor(passwordStrength)}.500`}>
                     {getPasswordStrengthText(passwordStrength)}
                   </Text>
@@ -226,7 +231,7 @@ const Signup: React.FC = () => {
           </FormControl>
           
           <FormControl id="confirmPassword" isInvalid={!!errors.confirmPassword}>
-            <FormLabel>Confirm Password</FormLabel>
+            <FormLabel color={textColor}>Confirm Password</FormLabel>
             <InputGroup>
               <Input
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -258,7 +263,7 @@ const Signup: React.FC = () => {
               })}
               colorScheme="brand"
             >
-              <Text fontSize="sm">
+              <Text fontSize="sm" color={textColor}>
                 I agree to the{' '}
                 <Link color="brand.500" _hover={{ color: 'brand.600' }}>
                   Terms of Service
@@ -286,7 +291,7 @@ const Signup: React.FC = () => {
       </form>
 
       {/* Sign in link */}
-      <Text textAlign="center" fontSize="sm">
+      <Text textAlign="center" fontSize="sm" color={textColor}>
         Already have an account?{' '}
         <Link
           as={RouterLink}

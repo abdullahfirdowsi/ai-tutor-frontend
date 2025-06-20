@@ -16,6 +16,7 @@ import {
   VStack,
   HStack,
   Checkbox,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -35,6 +36,10 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
+  
+  // Color mode values
+  const textColor = useColorModeValue('gray.800', 'gray.100');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
   
   const { 
     register, 
@@ -72,8 +77,8 @@ const Login: React.FC = () => {
     <VStack spacing={8} align="stretch">
       {/* Header */}
       <VStack spacing={2} textAlign="center">
-        <Heading size="lg">Welcome back</Heading>
-        <Text color="gray.600">
+        <Heading size="lg" color={textColor}>Welcome back</Heading>
+        <Text color={mutedTextColor}>
           Sign in to continue your learning journey
         </Text>
       </VStack>
@@ -84,7 +89,7 @@ const Login: React.FC = () => {
       {/* Divider */}
       <HStack>
         <Divider />
-        <Text fontSize="sm" color="gray.500" px={3}>
+        <Text fontSize="sm" color={mutedTextColor} px={3}>
           or
         </Text>
         <Divider />
@@ -94,7 +99,7 @@ const Login: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <VStack spacing={6}>
           <FormControl id="email" isInvalid={!!errors.email}>
-            <FormLabel>Email address</FormLabel>
+            <FormLabel color={textColor}>Email address</FormLabel>
             <InputGroup>
               <Input
                 type="email"
@@ -116,7 +121,7 @@ const Login: React.FC = () => {
           </FormControl>
           
           <FormControl id="password" isInvalid={!!errors.password}>
-            <FormLabel>Password</FormLabel>
+            <FormLabel color={textColor}>Password</FormLabel>
             <InputGroup>
               <Input
                 type={showPassword ? 'text' : 'password'}
@@ -146,7 +151,7 @@ const Login: React.FC = () => {
           {/* Remember me and forgot password */}
           <HStack justify="space-between" w="full">
             <Checkbox {...register('rememberMe')} colorScheme="brand">
-              <Text fontSize="sm">Remember me</Text>
+              <Text fontSize="sm" color={textColor}>Remember me</Text>
             </Checkbox>
             <Link
               as={RouterLink}
@@ -173,7 +178,7 @@ const Login: React.FC = () => {
       </form>
 
       {/* Sign up link */}
-      <Text textAlign="center" fontSize="sm">
+      <Text textAlign="center" fontSize="sm" color={textColor}>
         Don't have an account?{' '}
         <Link
           as={RouterLink}

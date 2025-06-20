@@ -404,14 +404,40 @@ const components = {
       },
     },
   },
+  Text: {
+    baseStyle: {
+      color: 'gray.800',
+      _dark: {
+        color: 'gray.100',
+      },
+    },
+    variants: {
+      gradient: {
+        bgGradient: 'linear(135deg, #A855F7 0%, #3B82F6 100%)',
+        bgClip: 'text',
+      },
+      muted: {
+        color: 'gray.600',
+        _dark: {
+          color: 'gray.400',
+        },
+      },
+      subtle: {
+        color: 'gray.500',
+        _dark: {
+          color: 'gray.500',
+        },
+      },
+    },
+  },
 };
 
-// Global styles with logo-inspired design
+// Global styles with logo-inspired design and improved text contrast
 const styles = {
   global: (props: any) => ({
     body: {
       fontFamily: 'body',
-      color: props.colorMode === 'dark' ? 'white' : 'gray.800',
+      color: props.colorMode === 'dark' ? 'gray.100' : 'gray.800',
       bg: props.colorMode === 'dark' ? 'gray.900' : 'gray.50',
       lineHeight: 'tall',
     },
@@ -421,6 +447,10 @@ const styles = {
     '*, *::before, &::after': {
       borderColor: props.colorMode === 'dark' ? 'gray.700' : 'gray.200',
       wordWrap: 'break-word',
+    },
+    // Ensure proper text contrast
+    'p, span, div': {
+      color: props.colorMode === 'dark' ? 'gray.100' : 'gray.800',
     },
     // Smooth scrolling
     html: {

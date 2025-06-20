@@ -99,6 +99,9 @@ const Dashboard: React.FC = () => {
     'linear(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
     'linear(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)'
   );
+  const textColor = useColorModeValue('gray.800', 'gray.100');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
+  const subtleTextColor = useColorModeValue('gray.500', 'gray.500');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -191,7 +194,7 @@ const Dashboard: React.FC = () => {
           <Icon as={FiWifi} boxSize={16} color="red.400" />
           <VStack spacing={4}>
             <Heading size="lg" color="red.500">Service Unavailable</Heading>
-            <Text color="gray.600" maxW="md">
+            <Text color={mutedTextColor} maxW="md">
               The dashboard service is currently unavailable. Please ensure you have an active internet connection and the service is running.
             </Text>
           </VStack>
@@ -226,7 +229,6 @@ const Dashboard: React.FC = () => {
         borderRadius="3xl"
         p={8}
         mb={8}
-        color="white"
         position="relative"
         overflow="hidden"
         boxShadow="gradient-lg"
@@ -236,13 +238,13 @@ const Dashboard: React.FC = () => {
         <Box position="relative" zIndex={1}>
           <HStack justify="space-between" align="start" mb={4}>
             <VStack align="start" spacing={2}>
-              <Text fontSize="lg" opacity={0.9}>
+              <Text fontSize="lg" color={mutedTextColor}>
                 {getGreeting()}, {currentUser?.displayName?.split(' ')[0] || 'Student'}! 👋
               </Text>
-              <Heading size="xl" fontWeight="bold" color="gray.800">
+              <Heading size="xl" fontWeight="bold" color={textColor}>
                 Ready to continue learning?
               </Heading>
-              <Text opacity={0.8} maxW="md" color="gray.700">
+              <Text color={mutedTextColor} maxW="md">
                 {stats.streak > 0 
                   ? `You're on a ${stats.streak}-day learning streak! Keep it up to reach your weekly goal.`
                   : 'Start your learning journey today!'
@@ -255,7 +257,7 @@ const Dashboard: React.FC = () => {
                   🔥 {stats.streak} Day Streak
                 </Badge>
               )}
-              <Text fontSize="sm" opacity={0.8} color="gray.700">
+              <Text fontSize="sm" color={mutedTextColor}>
                 {stats.completedThisWeek}/{stats.weeklyGoal} lessons this week
               </Text>
             </VStack>
@@ -266,8 +268,8 @@ const Dashboard: React.FC = () => {
               <CardBody>
                 <HStack justify="space-between" mb={3}>
                   <VStack align="start" spacing={1}>
-                    <Text fontSize="sm" opacity={0.9} color="gray.700">Continue Learning</Text>
-                    <Text fontWeight="bold" color="gray.800">{userProgress.current_lesson.title}</Text>
+                    <Text fontSize="sm" color={mutedTextColor}>Continue Learning</Text>
+                    <Text fontWeight="bold" color={textColor}>{userProgress.current_lesson.title}</Text>
                   </VStack>
                   <Button
                     leftIcon={<FiPlay />}
@@ -288,7 +290,7 @@ const Dashboard: React.FC = () => {
                   borderRadius="full"
                   size="sm"
                 />
-                <HStack justify="space-between" mt={2} fontSize="sm" opacity={0.9} color="gray.700">
+                <HStack justify="space-between" mt={2} fontSize="sm" color={mutedTextColor}>
                   <Text>{Math.round(userProgress.current_lesson.progress * 100)}% complete</Text>
                 </HStack>
               </CardBody>
@@ -297,10 +299,10 @@ const Dashboard: React.FC = () => {
             <Card bg="whiteAlpha.200" backdropFilter="blur(10px)" border="1px solid" borderColor="whiteAlpha.300" borderRadius="2xl">
               <CardBody textAlign="center">
                 <VStack spacing={3}>
-                  <Icon as={FiBook} boxSize={8} opacity={0.8} color="gray.700" />
+                  <Icon as={FiBook} boxSize={8} color={mutedTextColor} />
                   <VStack spacing={1}>
-                    <Text fontWeight="bold" color="gray.800">Ready to start learning?</Text>
-                    <Text fontSize="sm" opacity={0.8} color="gray.700">Browse our lessons to begin your journey</Text>
+                    <Text fontWeight="bold" color={textColor}>Ready to start learning?</Text>
+                    <Text fontSize="sm" color={mutedTextColor}>Browse our lessons to begin your journey</Text>
                   </VStack>
                   <Button
                     leftIcon={<FiBook />}
@@ -372,7 +374,7 @@ const Dashboard: React.FC = () => {
               <HStack justify="space-between">
                 <HStack>
                   <Icon as={FiTrendingUp} color="brand.500" />
-                  <Heading size="md">Recent Activity</Heading>
+                  <Heading size="md" color={textColor}>Recent Activity</Heading>
                 </HStack>
                 <Button variant="ghost" size="sm" rightIcon={<FiChevronRight />} borderRadius="xl">
                   View All
@@ -387,7 +389,7 @@ const Dashboard: React.FC = () => {
                   ))}
                 </VStack>
               ) : (
-                <VStack spacing={4} py={8} textAlign="center" color="gray.500">
+                <VStack spacing={4} py={8} textAlign="center" color={subtleTextColor}>
                   <Icon as={FiTrendingUp} boxSize={12} />
                   <VStack spacing={2}>
                     <Text fontWeight="medium">No recent activity</Text>
@@ -418,7 +420,7 @@ const Dashboard: React.FC = () => {
             {/* Quick Actions */}
             <Card bg={cardBg} borderRadius="2xl" boxShadow="gradient-md">
               <CardHeader>
-                <Heading size="md">Quick Actions</Heading>
+                <Heading size="md" color={textColor}>Quick Actions</Heading>
               </CardHeader>
               <CardBody pt={0}>
                 <VStack spacing={3} align="stretch">
@@ -460,7 +462,7 @@ const Dashboard: React.FC = () => {
             {/* Recommended Lessons */}
             <Card bg={cardBg} borderRadius="2xl" boxShadow="gradient-md">
               <CardHeader>
-                <Heading size="md">Recommended for You</Heading>
+                <Heading size="md" color={textColor}>Recommended for You</Heading>
               </CardHeader>
               <CardBody pt={0}>
                 {recommendedLessons.length > 0 ? (
@@ -470,7 +472,7 @@ const Dashboard: React.FC = () => {
                     ))}
                   </VStack>
                 ) : (
-                  <VStack spacing={4} py={6} textAlign="center" color="gray.500">
+                  <VStack spacing={4} py={6} textAlign="center" color={subtleTextColor}>
                     <Icon as={FiBook} boxSize={10} />
                     <VStack spacing={2}>
                       <Text fontWeight="medium" fontSize="sm">No recommendations yet</Text>
@@ -501,8 +503,8 @@ const Dashboard: React.FC = () => {
               <Card bg={cardBg} borderColor="yellow.200" borderWidth="2px" borderRadius="2xl" boxShadow="gradient-md">
                 <CardBody textAlign="center">
                   <Icon as={FiAward} boxSize={8} color="yellow.500" mb={2} />
-                  <Text fontWeight="bold" mb={1}>Achievement Unlocked!</Text>
-                  <Text fontSize="sm" color="gray.600">
+                  <Text fontWeight="bold" mb={1} color={textColor}>Achievement Unlocked!</Text>
+                  <Text fontSize="sm" color={mutedTextColor}>
                     Completed {stats.lessonsCompleted}+ lessons!
                   </Text>
                 </CardBody>
@@ -525,6 +527,8 @@ interface StatCardProps {
 
 const StatCard: React.FC<StatCardProps> = ({ icon, label, value, helpText, colorScheme }) => {
   const cardBg = useColorModeValue('white', 'gray.800');
+  const textColor = useColorModeValue('gray.800', 'gray.100');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
   
   return (
     <Card bg={cardBg} borderRadius="2xl" boxShadow="gradient-md">
@@ -532,12 +536,12 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value, helpText, color
         <Stat>
           <HStack mb={2}>
             <Icon as={icon} color={`${colorScheme}.500`} boxSize={5} />
-            <StatLabel fontSize="sm" fontWeight="medium">{label}</StatLabel>
+            <StatLabel fontSize="sm" fontWeight="medium" color={textColor}>{label}</StatLabel>
           </HStack>
           <StatNumber fontSize="2xl" fontWeight="bold" bgGradient="linear(135deg, #A855F7 0%, #3B82F6 100%)" bgClip="text">
             {value}
           </StatNumber>
-          <StatHelpText fontSize="xs">{helpText}</StatHelpText>
+          <StatHelpText fontSize="xs" color={mutedTextColor}>{helpText}</StatHelpText>
         </Stat>
       </CardBody>
     </Card>
@@ -554,6 +558,9 @@ interface ActivityItemProps {
 }
 
 const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
+  const textColor = useColorModeValue('gray.800', 'gray.100');
+  const mutedTextColor = useColorModeValue('gray.500', 'gray.500');
+  
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'lesson_completed':
@@ -573,8 +580,8 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
     <HStack spacing={3} p={3} borderRadius="xl" _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}>
       <Icon as={icon} color={color} boxSize={5} />
       <VStack align="start" spacing={0} flex={1}>
-        <Text fontWeight="medium" fontSize="sm">{activity.title}</Text>
-        <Text fontSize="xs" color="gray.500">{activity.time}</Text>
+        <Text fontWeight="medium" fontSize="sm" color={textColor}>{activity.title}</Text>
+        <Text fontSize="xs" color={mutedTextColor}>{activity.time}</Text>
       </VStack>
       {activity.score && (
         <Badge variant="gradient" borderRadius="full">
@@ -595,6 +602,9 @@ interface RecommendedLessonCardProps {
 }
 
 const RecommendedLessonCard: React.FC<RecommendedLessonCardProps> = ({ lesson }) => {
+  const textColor = useColorModeValue('gray.800', 'gray.100');
+  const mutedTextColor = useColorModeValue('gray.500', 'gray.500');
+  
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
@@ -634,14 +644,14 @@ const RecommendedLessonCard: React.FC<RecommendedLessonCardProps> = ({ lesson })
         <Icon as={FiBook} color="brand.500" />
       </Box>
       <VStack align="start" spacing={1} flex={1}>
-        <Text fontWeight="medium" fontSize="sm" noOfLines={2}>
+        <Text fontWeight="medium" fontSize="sm" noOfLines={2} color={textColor}>
           {lesson.title}
         </Text>
         <HStack spacing={2}>
           <Badge colorScheme={getDifficultyColor(lesson.difficulty)} size="sm" borderRadius="full">
             {lesson.difficulty}
           </Badge>
-          <Text fontSize="xs" color="gray.500">
+          <Text fontSize="xs" color={mutedTextColor}>
             {lesson.duration_minutes} min
           </Text>
         </HStack>
