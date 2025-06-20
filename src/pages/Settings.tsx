@@ -43,7 +43,6 @@ import {
   FiSave,
   FiRefreshCw,
 } from 'react-icons/fi';
-import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
 interface UserSettings {

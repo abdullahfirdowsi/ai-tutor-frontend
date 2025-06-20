@@ -46,8 +46,6 @@ import {
   FiCalendar,
   FiTarget,
   FiRefreshCw,
-  FiEdit,
-  FiTrash2,
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
