@@ -73,7 +73,7 @@ const AuthLayout: React.FC = () => {
                     AI Tutor
                   </Heading>
                   <Text color={textColor} fontSize="lg">
-                    Your personalized learning companion
+                    Powered by VizTalk AI
                   </Text>
                 </VStack>
               </HStack>

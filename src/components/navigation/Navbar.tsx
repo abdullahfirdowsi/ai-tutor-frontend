@@ -53,6 +53,9 @@ const Navbar: React.FC = () => {
     }
   };
 
+  // Choose logo based on color mode
+  const logoSrc = colorMode === 'dark' ? '/aitutor-short-dark.png' : '/aitutor-short-no-bg.png';
+
   return (
     <Box>
       <Flex
@@ -89,10 +92,10 @@ const Navbar: React.FC = () => {
         <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }} align="center">
           <HStack spacing={3}>
             <Image
-              src="/aitutor-nobackground.png"
+              src={logoSrc}
               alt="AI Tutor Logo"
-              w="50px"
-              h="50px"
+              w="40px"
+              h="40px"
               borderRadius="lg"
             />
             <Text

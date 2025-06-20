@@ -36,6 +36,7 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({
   const userBg = useColorModeValue('brand.500', 'brand.600');
   const aiBg = useColorModeValue('gray.100', 'gray.700');
   const codeBlockBg = useColorModeValue('gray.100', 'gray.800');
+  const colorMode = useColorModeValue('light', 'dark');
   
   // Format timestamp
   const formatTimestamp = (timestamp: string) => {
@@ -94,6 +95,9 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({
       />
     ),
   };
+
+  // Choose AI avatar based on color mode
+  const aiAvatarSrc = colorMode === 'dark' ? '/aitutor-short-dark.png' : '/aitutor-short-no-bg.png';
   
   return (
     <VStack spacing={4} align="stretch">
@@ -127,8 +131,8 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({
         <Avatar
           size="sm"
           name="AI Tutor"
-          bg="brand.500"
-          src="/aitutor-nobackground.png"
+          bg="transparent"
+          src={aiAvatarSrc}
           mr={3}
         />
         <Box

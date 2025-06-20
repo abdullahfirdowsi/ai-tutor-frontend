@@ -1,6 +1,6 @@
 {
   "short_name": "AI Tutor",
-  "name": "AI Tutor - Personalized Learning with AI",
+  "name": "AI Tutor - Powered by VizTalk AI",
   "icons": [
     {
       "src": "aitutor-nobackground.png",
@@ -22,5 +22,5 @@
   "display": "standalone",
   "theme_color": "#3182CE",
   "background_color": "#ffffff",
-  "description": "Your personalized learning companion powered by artificial intelligence"
+  "description": "Your personalized learning companion powered by VizTalk AI"
 }
