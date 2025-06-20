@@ -24,7 +24,6 @@ const AuthLayout: React.FC = () => {
     'linear(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)'
   );
   const cardBg = useColorModeValue('white', 'gray.800');
-  const headingColor = useColorModeValue('gray.800', 'white');
   const textColor = useColorModeValue('gray.600', 'gray.300');
   const featureIconBg = useColorModeValue('brand.100', 'brand.900');
   const featureTitleColor = useColorModeValue('gray.800', 'white');

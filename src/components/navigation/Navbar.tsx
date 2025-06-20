@@ -40,7 +40,6 @@ const Navbar: React.FC = () => {
   // Move all hooks to the top
   const bg = useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(26, 32, 44, 0.8)');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const logoColor = useColorModeValue('brand.600', 'brand.300');
   const textColor = useColorModeValue('gray.600', 'white');
   const hoverBg = useColorModeValue('gray.100', 'gray.700');
 
