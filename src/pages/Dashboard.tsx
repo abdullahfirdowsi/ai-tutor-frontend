@@ -37,7 +37,9 @@ import {
   FiAward,
   FiCalendar,
   FiPlay,
-  FiChevronRight
+  FiChevronRight,
+  FiWifi,
+  FiRefreshCw
 } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -104,26 +106,11 @@ const Dashboard: React.FC = () => {
       setHasError(false);
 
       try {
-        // Fetch user progress - this is the main data we need
-        try {
-          const progressResponse = await api.get('/users/me/progress');
-          setUserProgress(progressResponse.data);
-        } catch (progressError) {
-          console.warn('No progress data available yet:', progressError);
-          // Set empty progress instead of error
-          setUserProgress({
-            completed_lessons: [],
-            total_time_spent: 0,
-            statistics: {
-              questions_asked: 0,
-              streak: 0,
-              weekly_goal: 7,
-              completed_this_week: 0,
-            }
-          });
-        }
+        // Fetch user progress
+        const progressResponse = await api.get('/users/me/progress');
+        setUserProgress(progressResponse.data);
 
-        // Fetch recent activity - optional data
+        // Fetch recent activity
         try {
           const activityResponse = await api.get('/users/me/activity?limit=5');
           setRecentActivity(activityResponse.data.activities || []);
@@ -132,7 +119,7 @@ const Dashboard: React.FC = () => {
           setRecentActivity([]);
         }
 
-        // Fetch recommended lessons - optional data
+        // Fetch recommended lessons
         try {
           const recommendedResponse = await api.get('/lessons/recommended?limit=3');
           setRecommendedLessons(recommendedResponse.data.lessons || []);
@@ -142,23 +129,8 @@ const Dashboard: React.FC = () => {
         }
 
       } catch (err: any) {
-        console.error('Critical error fetching dashboard data:', err);
-        // Only set error for critical failures (like network issues)
-        if (err.code === 'NETWORK_ERROR' || err.response?.status >= 500) {
-          setHasError(true);
-        } else {
-          // For other errors, just show empty state
-          setUserProgress({
-            completed_lessons: [],
-            total_time_spent: 0,
-            statistics: {
-              questions_asked: 0,
-              streak: 0,
-              weekly_goal: 7,
-              completed_this_week: 0,
-            }
-          });
-        }
+        console.error('Failed to fetch dashboard data:', err);
+        setHasError(true);
       } finally {
         setIsLoading(false);
       }
@@ -207,16 +179,31 @@ const Dashboard: React.FC = () => {
   if (hasError) {
     return (
       <Container maxW="container.xl" py={8}>
-        <Alert status="error" borderRadius="lg">
+        <Alert status="error" borderRadius="lg" mb={6}>
           <AlertIcon />
           <AlertTitle mr={2}>Connection Error</AlertTitle>
           <AlertDescription>
-            Unable to connect to the server. Please check your internet connection and try again.
+            Unable to connect to the AI Tutor service. Please check your internet connection and try again.
           </AlertDescription>
         </Alert>
-        <Button mt={4} onClick={() => window.location.reload()} colorScheme="brand">
-          Retry
-        </Button>
+        
+        <VStack spacing={8} textAlign="center">
+          <Icon as={FiWifi} boxSize={16} color="red.400" />
+          <VStack spacing={4}>
+            <Heading size="lg" color="red.500">Service Unavailable</Heading>
+            <Text color="gray.600" maxW="md">
+              The dashboard service is currently unavailable. Please ensure you have an active internet connection and the service is running.
+            </Text>
+          </VStack>
+          <Button 
+            leftIcon={<FiRefreshCw />}
+            onClick={() => window.location.reload()} 
+            colorScheme="brand"
+            size="lg"
+          >
+            Try Again
+          </Button>
+        </VStack>
       </Container>
     );
   }

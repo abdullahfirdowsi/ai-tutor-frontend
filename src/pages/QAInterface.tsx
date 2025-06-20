@@ -29,6 +29,10 @@ import {
   Input,
   useBreakpointValue,
   Icon,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
 } from '@chakra-ui/react';
 import { 
   FiMessageSquare, 
@@ -72,7 +76,7 @@ const QAInterface: React.FC = () => {
   const [messages, setMessages] = useState<QAMessage[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingSessions, setIsLoadingSessions] = useState<boolean>(true);
-  const [hasNetworkError, setHasNetworkError] = useState<boolean>(false);
+  const [hasError, setHasError] = useState<boolean>(false);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   
   // New session form
@@ -91,7 +95,7 @@ const QAInterface: React.FC = () => {
   // Fetch sessions
   const fetchSessions = useCallback(async () => {
     setIsLoadingSessions(true);
-    setHasNetworkError(false);
+    setHasError(false);
     
     try {
       const response = await api.get<QASessionsResponse>('/qa/sessions');
@@ -105,15 +109,9 @@ const QAInterface: React.FC = () => {
         setMessages(mostRecent.messages || []);
       }
     } catch (err: any) {
-      console.warn('Failed to fetch sessions:', err);
-      
-      // Only show network error for critical failures
-      if (err.code === 'NETWORK_ERROR' || !err.response || err.response?.status >= 500) {
-        setHasNetworkError(true);
-      } else {
-        // For other errors, just show empty state
-        setSessions([]);
-      }
+      console.error('Failed to fetch sessions:', err);
+      setHasError(true);
+      setSessions([]);
     } finally {
       setIsLoadingSessions(false);
     }
@@ -156,7 +154,7 @@ const QAInterface: React.FC = () => {
     return 'General';
   };
   
-  // Create new session with better error handling
+  // Create new session
   const createSession = async (title?: string, topic?: string): Promise<QASession> => {
     try {
       const sessionData: CreateSessionRequest = {
@@ -165,12 +163,8 @@ const QAInterface: React.FC = () => {
         lesson_id: selectedLessonId || undefined,
       };
       
-      console.log('Creating session with data:', sessionData);
-      
       const response = await api.post('/qa/sessions', sessionData);
       const newSession = response.data;
-      
-      console.log('Session created successfully:', newSession);
       
       // Add to sessions list
       setSessions(prev => [newSession, ...prev]);
@@ -178,35 +172,11 @@ const QAInterface: React.FC = () => {
       return newSession;
     } catch (error: any) {
       console.error('Error creating session:', error);
-      
-      // Create a mock session for offline functionality
-      const mockSession: QASession = {
-        id: `mock-${Date.now()}`,
-        title: title || 'New Conversation',
-        topic: topic,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        message_count: 0,
-        lesson_id: selectedLessonId || undefined,
-        messages: [],
-        is_active: true,
-      };
-      
-      setSessions(prev => [mockSession, ...prev]);
-      
-      toast({
-        title: 'Working in offline mode',
-        description: 'Session created locally. Connect to save permanently.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
-      
-      return mockSession;
+      throw new Error('Failed to create conversation. Please check your connection and try again.');
     }
   };
   
-  // Handle question submission with better error handling
+  // Handle question submission
   const handleQuestionSubmit = async (question: string, context?: string) => {
     setIsLoading(true);
     
@@ -221,89 +191,40 @@ const QAInterface: React.FC = () => {
         setActiveSession(currentSession);
       }
       
-      // Create optimistic message
-      const optimisticMessage: QAMessage = {
-        id: `temp-${Date.now()}`,
+      // Send question to API
+      const requestData: AskQuestionRequest = {
         question,
-        answer: 'Thinking...',
-        created_at: new Date().toISOString(),
+        context,
+        session_id: currentSession.id,
         lesson_id: selectedLessonId || undefined,
-        references: [],
       };
       
-      setMessages(prev => [...prev, optimisticMessage]);
+      const response = await api.post('/qa/ask', requestData);
+      const newMessage = response.data;
       
-      try {
-        // Send question to API
-        const requestData: AskQuestionRequest = {
-          question,
-          context,
-          session_id: currentSession.id,
-          lesson_id: selectedLessonId || undefined,
-        };
-        
-        const response = await api.post('/qa/ask', requestData);
-        const actualMessage = response.data;
-        
-        // Replace optimistic message with actual response
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === optimisticMessage.id ? actualMessage : msg
-          )
-        );
-        
-        // Update session in list
-        setSessions(prev => 
-          prev.map(session => 
-            session.id === currentSession!.id 
-              ? { 
-                  ...session, 
-                  message_count: session.message_count + 1,
-                  updated_at: new Date().toISOString(),
-                  messages: [...(session.messages || []), actualMessage]
-                }
-              : session
-          )
-        );
-        
-      } catch (apiError: any) {
-        console.error('API error:', apiError);
-        
-        // Provide a fallback response for offline mode
-        const fallbackMessage: QAMessage = {
-          id: `fallback-${Date.now()}`,
-          question,
-          answer: `I'm currently unable to connect to the AI service. This appears to be a question about ${generateTopic(question).toLowerCase()}. Please try again when you have an internet connection, or check if the backend service is running.`,
-          created_at: new Date().toISOString(),
-          lesson_id: selectedLessonId || undefined,
-          references: [],
-        };
-        
-        // Replace optimistic message with fallback
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === optimisticMessage.id ? fallbackMessage : msg
-          )
-        );
-        
-        toast({
-          title: 'Working in offline mode',
-          description: 'Your question was saved. AI response will be available when connected.',
-          status: 'warning',
-          duration: 5000,
-          isClosable: true,
-        });
-      }
+      // Add message to current messages
+      setMessages(prev => [...prev, newMessage]);
+      
+      // Update session in list
+      setSessions(prev => 
+        prev.map(session => 
+          session.id === currentSession!.id 
+            ? { 
+                ...session, 
+                message_count: session.message_count + 1,
+                updated_at: new Date().toISOString(),
+                messages: [...(session.messages || []), newMessage]
+              }
+            : session
+        )
+      );
       
     } catch (err: any) {
       console.error('Error submitting question:', err);
       
-      // Remove optimistic message on error
-      setMessages(prev => prev.filter(msg => !msg.id.startsWith('temp-')));
-      
       toast({
-        title: 'Unable to process question',
-        description: 'Please check your connection and try again.',
+        title: 'Failed to send question',
+        description: err.message || 'Please check your connection and try again.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -343,8 +264,8 @@ const QAInterface: React.FC = () => {
       console.error('Error updating session:', error);
       toast({
         title: 'Failed to update session',
-        description: 'Changes saved locally only.',
-        status: 'warning',
+        description: 'Please try again.',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -354,12 +275,7 @@ const QAInterface: React.FC = () => {
   // Handle session deletion
   const handleSessionDelete = async (sessionId: string) => {
     try {
-      // Try to delete from server
-      try {
-        await api.delete(`/qa/sessions/${sessionId}`);
-      } catch (error) {
-        console.warn('Could not delete from server, deleting locally:', error);
-      }
+      await api.delete(`/qa/sessions/${sessionId}`);
       
       setSessions(prev => prev.filter(session => session.id !== sessionId));
       
@@ -382,6 +298,7 @@ const QAInterface: React.FC = () => {
     } catch (error) {
       toast({
         title: 'Failed to delete conversation',
+        description: 'Please try again.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -389,7 +306,7 @@ const QAInterface: React.FC = () => {
     }
   };
   
-  // Handle new session creation with better error handling
+  // Handle new session creation
   const handleNewSession = async () => {
     try {
       const title = newSessionTitle.trim() || 'New Conversation';
@@ -409,46 +326,46 @@ const QAInterface: React.FC = () => {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in handleNewSession:', error);
       toast({
         title: 'Failed to create conversation',
-        description: 'Please try again or check your connection.',
+        description: error.message || 'Please check your connection and try again.',
         status: 'error',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
     }
   };
 
-  // Show network error only for critical failures
-  if (hasNetworkError) {
+  // Show connection error
+  if (hasError) {
     return (
       <Container maxW="container.xl" py={8}>
+        <Alert status="error" borderRadius="lg" mb={6}>
+          <AlertIcon />
+          <AlertTitle mr={2}>Connection Error</AlertTitle>
+          <AlertDescription>
+            Unable to connect to the AI Tutor service. Please check your internet connection and try again.
+          </AlertDescription>
+        </Alert>
+        
         <VStack spacing={8} textAlign="center">
           <Icon as={FiWifi} boxSize={16} color="red.400" />
           <VStack spacing={4}>
-            <Heading size="lg" color="red.500">Connection Problem</Heading>
+            <Heading size="lg" color="red.500">Service Unavailable</Heading>
             <Text color="gray.600" maxW="md">
-              We're having trouble connecting to our servers. You can still create conversations that will work in offline mode.
+              The AI Tutor service is currently unavailable. Please ensure you have an active internet connection and the service is running.
             </Text>
           </VStack>
-          <HStack spacing={4}>
-            <Button 
-              leftIcon={<FiRefreshCw />}
-              onClick={fetchSessions} 
-              colorScheme="brand"
-            >
-              Try Again
-            </Button>
-            <Button 
-              leftIcon={<FiPlus />}
-              onClick={openNewSession}
-              variant="outline"
-            >
-              Start Offline Session
-            </Button>
-          </HStack>
+          <Button 
+            leftIcon={<FiRefreshCw />}
+            onClick={fetchSessions} 
+            colorScheme="brand"
+            size="lg"
+          >
+            Try Again
+          </Button>
         </VStack>
       </Container>
     );
@@ -596,7 +513,7 @@ const QAInterface: React.FC = () => {
                     <div ref={messagesEndRef} />
                   </VStack>
                   
-                  {/* Question input - Always show, create session automatically */}
+                  {/* Question input */}
                   <Box pt={6} borderTop="1px" borderColor="gray.200">
                     <QuestionInput 
                       onSubmit={handleQuestionSubmit} 

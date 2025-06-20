@@ -30,6 +30,10 @@ import {
   Card,
   CardBody,
   Skeleton,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
 } from '@chakra-ui/react';
 import { FiPlus, FiSearch, FiBook, FiWifi, FiRefreshCw } from 'react-icons/fi';
 import { useForm } from 'react-hook-form';
@@ -84,7 +88,7 @@ const LessonList: React.FC = () => {
   const [subjectFilter, setSubjectFilter] = useState<string>('');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [hasNetworkError, setHasNetworkError] = useState<boolean>(false);
+  const [hasError, setHasError] = useState<boolean>(false);
   
   // Form handling for lesson generation
   const {
@@ -97,7 +101,7 @@ const LessonList: React.FC = () => {
   // Fetch lessons function
   const fetchLessons = useCallback(async () => {
     setIsLoading(true);
-    setHasNetworkError(false);
+    setHasError(false);
     
     try {
       // Build query params
@@ -108,15 +112,9 @@ const LessonList: React.FC = () => {
       const response = await api.get<LessonListResponse>(`/lessons${queryParams}`);
       setLessons(response.data.lessons || []);
     } catch (err: any) {
-      console.warn('Failed to fetch lessons:', err);
-      
-      // Only show network error for critical failures
-      if (err.code === 'NETWORK_ERROR' || !err.response || err.response?.status >= 500) {
-        setHasNetworkError(true);
-      } else {
-        // For other errors (like 404, 401), just show empty state
-        setLessons([]);
-      }
+      console.error('Failed to fetch lessons:', err);
+      setHasError(true);
+      setLessons([]);
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +148,7 @@ const LessonList: React.FC = () => {
       console.error('Error generating lesson:', err);
       toast({
         title: 'Failed to generate lesson',
-        description: err.response?.data?.detail || 'Please try again later.',
+        description: err.response?.data?.detail || 'Please check your connection and try again.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -171,34 +169,34 @@ const LessonList: React.FC = () => {
   // Extract unique subjects for filter dropdown
   const subjects = Array.from(new Set(lessons.map(lesson => lesson.subject)));
   
-  // Show network error only for critical failures
-  if (hasNetworkError) {
+  // Show connection error
+  if (hasError) {
     return (
       <Container maxW="container.xl" py={8}>
+        <Alert status="error" borderRadius="lg" mb={6}>
+          <AlertIcon />
+          <AlertTitle mr={2}>Connection Error</AlertTitle>
+          <AlertDescription>
+            Unable to connect to the AI Tutor service. Please check your internet connection and try again.
+          </AlertDescription>
+        </Alert>
+        
         <VStack spacing={8} textAlign="center">
           <Icon as={FiWifi} boxSize={16} color="red.400" />
           <VStack spacing={4}>
-            <Heading size="lg" color="red.500">Connection Problem</Heading>
+            <Heading size="lg" color="red.500">Service Unavailable</Heading>
             <Text color="gray.600" maxW="md">
-              We're having trouble connecting to our servers. Please check your internet connection and try again.
+              The lesson service is currently unavailable. Please ensure you have an active internet connection and the service is running.
             </Text>
           </VStack>
-          <HStack spacing={4}>
-            <Button 
-              leftIcon={<FiRefreshCw />}
-              onClick={fetchLessons} 
-              colorScheme="brand"
-            >
-              Try Again
-            </Button>
-            <Button 
-              leftIcon={<FiPlus />}
-              onClick={onOpen}
-              variant="outline"
-            >
-              Generate Lesson Offline
-            </Button>
-          </HStack>
+          <Button 
+            leftIcon={<FiRefreshCw />}
+            onClick={fetchLessons} 
+            colorScheme="brand"
+            size="lg"
+          >
+            Try Again
+          </Button>
         </VStack>
       </Container>
     );
