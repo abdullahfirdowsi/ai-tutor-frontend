@@ -38,11 +38,14 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
   // Move all hooks to the top
-  const bg = useColorModeValue('white', 'gray.800');
+  const bg = useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(26, 32, 44, 0.8)');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const logoColor = useColorModeValue('brand.600', 'brand.300');
   const textColor = useColorModeValue('gray.600', 'white');
   const hoverBg = useColorModeValue('gray.100', 'gray.700');
+
+  // Choose logo based on color mode
+  const logoSrc = colorMode === 'dark' ? '/aitutor-short-dark.png' : '/aitutor-short-no-bg.png';
 
   const handleLogout = async () => {
     try {
@@ -52,9 +55,6 @@ const Navbar: React.FC = () => {
       console.error('Error logging out:', error);
     }
   };
-
-  // Choose logo based on color mode
-  const logoSrc = colorMode === 'dark' ? '/aitutor-short-dark.png' : '/aitutor-short-no-bg.png';
 
   return (
     <Box>
@@ -72,8 +72,8 @@ const Navbar: React.FC = () => {
         top="0"
         width="100%"
         zIndex="sticky"
-        backdropFilter="blur(10px)"
-        boxShadow="sm"
+        backdropFilter="blur(20px)"
+        boxShadow="gradient-sm"
       >
         <Flex
           flex={{ base: 1, md: 'auto' }}
@@ -97,16 +97,20 @@ const Navbar: React.FC = () => {
               w="40px"
               h="40px"
               borderRadius="lg"
+              transition="all 0.3s ease"
+              _hover={{ transform: 'scale(1.05)' }}
             />
             <Text
               textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
               fontFamily={'heading'}
-              color={logoColor}
+              bgGradient="linear(135deg, #A855F7 0%, #3B82F6 100%)"
+              bgClip="text"
               fontWeight="bold"
               fontSize="xl"
               as={RouterLink}
               to="/"
-              _hover={{ textDecoration: 'none', color: 'brand.500' }}
+              _hover={{ textDecoration: 'none', transform: 'scale(1.02)' }}
+              transition="all 0.3s ease"
             >
               AI Tutor
             </Text>
@@ -124,6 +128,7 @@ const Navbar: React.FC = () => {
               size="sm"
               position="relative"
               _hover={{ bg: hoverBg }}
+              borderRadius="xl"
             >
               <Badge
                 colorScheme="red"
@@ -138,6 +143,7 @@ const Navbar: React.FC = () => {
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
+                bgGradient="linear(135deg, #EF4444 0%, #DC2626 100%)"
               >
                 3
               </Badge>
@@ -153,6 +159,7 @@ const Navbar: React.FC = () => {
               variant="ghost"
               size="sm"
               _hover={{ bg: hoverBg }}
+              borderRadius="xl"
             />
           </Tooltip>
           
@@ -164,23 +171,34 @@ const Navbar: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 _hover={{ bg: hoverBg }}
+                borderRadius="xl"
               >
                 <HStack spacing={2}>
                   <Avatar 
                     size="sm" 
                     name={currentUser.displayName || undefined} 
                     src={currentUser.photoURL || undefined}
+                    border="2px solid"
+                    borderColor="brand.200"
                   />
                   <Text display={{ base: 'none', lg: 'block' }} fontSize="sm" fontWeight="medium">
                     {currentUser.displayName || currentUser.email?.split('@')[0]}
                   </Text>
                 </HStack>
               </MenuButton>
-              <MenuList>
-                <MenuItem as={RouterLink} to="/profile">Profile Settings</MenuItem>
-                <MenuItem as={RouterLink} to="/analytics">Learning Analytics</MenuItem>
-                <MenuItem>Help & Support</MenuItem>
-                <MenuItem onClick={handleLogout} color="red.500">Sign Out</MenuItem>
+              <MenuList borderRadius="xl" border="1px solid" borderColor={borderColor} boxShadow="gradient-md">
+                <MenuItem as={RouterLink} to="/profile" borderRadius="lg" _hover={{ bg: hoverBg }}>
+                  Profile Settings
+                </MenuItem>
+                <MenuItem as={RouterLink} to="/analytics" borderRadius="lg" _hover={{ bg: hoverBg }}>
+                  Learning Analytics
+                </MenuItem>
+                <MenuItem borderRadius="lg" _hover={{ bg: hoverBg }}>
+                  Help & Support
+                </MenuItem>
+                <MenuItem onClick={handleLogout} color="red.500" borderRadius="lg" _hover={{ bg: 'red.50' }}>
+                  Sign Out
+                </MenuItem>
               </MenuList>
             </Menu>
           )}

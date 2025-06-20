@@ -20,8 +20,8 @@ const AuthLayout: React.FC = () => {
   
   // Move all hooks to the top
   const bgGradient = useColorModeValue(
-    'linear(to-br, brand.50, purple.50)',
-    'linear(to-br, gray.900, gray.800)'
+    'linear(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+    'linear(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)'
   );
   const cardBg = useColorModeValue('white', 'gray.800');
   const headingColor = useColorModeValue('gray.800', 'white');
@@ -66,13 +66,13 @@ const AuthLayout: React.FC = () => {
                   w="80px"
                   h="80px"
                   borderRadius="xl"
-                  boxShadow="lg"
+                  boxShadow="gradient-lg"
                 />
                 <VStack align="start" spacing={0}>
-                  <Heading size="xl" color={headingColor}>
+                  <Heading size="xl" variant="gradient">
                     AI Tutor
                   </Heading>
-                  <Text color={textColor} fontSize="lg">
+                  <Text color={textColor} fontSize="lg" fontWeight="medium">
                     Powered by VizTalk AI
                   </Text>
                 </VStack>
@@ -121,29 +121,37 @@ const AuthLayout: React.FC = () => {
             <Box
               p={6}
               bg={socialProofBg}
-              borderRadius="xl"
-              boxShadow="md"
+              borderRadius="2xl"
+              boxShadow="gradient-md"
               w="full"
               maxW="md"
+              border="1px solid"
+              borderColor={borderColor}
             >
               <Text fontSize="sm" color={socialProofTextColor} mb={2}>
                 Trusted by learners worldwide
               </Text>
               <HStack spacing={6}>
                 <VStack spacing={0}>
-                  <Text fontSize="2xl" fontWeight="bold" color="brand.500">10K+</Text>
+                  <Text fontSize="2xl" fontWeight="bold" bgGradient="linear(135deg, #A855F7 0%, #3B82F6 100%)" bgClip="text">
+                    10K+
+                  </Text>
                   <Text fontSize="xs" color={socialProofSubColor}>
                     Active Learners
                   </Text>
                 </VStack>
                 <VStack spacing={0}>
-                  <Text fontSize="2xl" fontWeight="bold" color="brand.500">50K+</Text>
+                  <Text fontSize="2xl" fontWeight="bold" bgGradient="linear(135deg, #A855F7 0%, #3B82F6 100%)" bgClip="text">
+                    50K+
+                  </Text>
                   <Text fontSize="xs" color={socialProofSubColor}>
                     Lessons Completed
                   </Text>
                 </VStack>
                 <VStack spacing={0}>
-                  <Text fontSize="2xl" fontWeight="bold" color="brand.500">95%</Text>
+                  <Text fontSize="2xl" fontWeight="bold" bgGradient="linear(135deg, #A855F7 0%, #3B82F6 100%)" bgClip="text">
+                    95%
+                  </Text>
                   <Text fontSize="xs" color={socialProofSubColor}>
                     Satisfaction Rate
                   </Text>
@@ -156,8 +164,8 @@ const AuthLayout: React.FC = () => {
           <Box
             bg={cardBg}
             p={8}
-            borderRadius="2xl"
-            boxShadow="2xl"
+            borderRadius="3xl"
+            boxShadow="gradient-lg"
             w="full"
             maxW="450px"
             border="1px solid"
@@ -192,10 +200,12 @@ const FeatureItem: React.FC<FeatureItemProps> = ({
     <HStack spacing={4} align="start">
       <Box
         p={3}
-        bg={iconBg}
-        borderRadius="lg"
+        bgGradient="linear(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)"
+        borderRadius="xl"
         color="brand.500"
         flexShrink={0}
+        border="1px solid"
+        borderColor="brand.200"
       >
         <Icon as={icon} boxSize={6} />
       </Box>

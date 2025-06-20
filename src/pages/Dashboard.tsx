@@ -96,8 +96,8 @@ const Dashboard: React.FC = () => {
 
   const cardBg = useColorModeValue('white', 'gray.800');
   const gradientBg = useColorModeValue(
-    'linear(to-r, brand.500, purple.500)',
-    'linear(to-r, brand.600, purple.600)'
+    'linear(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+    'linear(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)'
   );
 
   useEffect(() => {
@@ -157,18 +157,18 @@ const Dashboard: React.FC = () => {
     return (
       <Container maxW="container.xl" py={8}>
         <VStack spacing={8} align="stretch">
-          <Skeleton height="200px" borderRadius="2xl" />
+          <Skeleton height="200px" borderRadius="3xl" />
           <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6}>
             {Array(4).fill(0).map((_, i) => (
-              <Skeleton key={i} height="120px" borderRadius="xl" />
+              <Skeleton key={i} height="120px" borderRadius="2xl" />
             ))}
           </SimpleGrid>
           <Grid templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(3, 1fr)' }} gap={8}>
             <GridItem colSpan={{ base: 1, lg: 2 }}>
-              <Skeleton height="400px" borderRadius="xl" />
+              <Skeleton height="400px" borderRadius="2xl" />
             </GridItem>
             <GridItem>
-              <Skeleton height="400px" borderRadius="xl" />
+              <Skeleton height="400px" borderRadius="2xl" />
             </GridItem>
           </Grid>
         </VStack>
@@ -179,7 +179,7 @@ const Dashboard: React.FC = () => {
   if (hasError) {
     return (
       <Container maxW="container.xl" py={8}>
-        <Alert status="error" borderRadius="lg" mb={6}>
+        <Alert status="error" borderRadius="2xl" mb={6} boxShadow="gradient-md">
           <AlertIcon />
           <AlertTitle mr={2}>Connection Error</AlertTitle>
           <AlertDescription>
@@ -200,6 +200,7 @@ const Dashboard: React.FC = () => {
             onClick={() => window.location.reload()} 
             colorScheme="brand"
             size="lg"
+            borderRadius="xl"
           >
             Try Again
           </Button>
@@ -222,12 +223,15 @@ const Dashboard: React.FC = () => {
       {/* Welcome Header */}
       <Box
         bgGradient={gradientBg}
-        borderRadius="2xl"
+        borderRadius="3xl"
         p={8}
         mb={8}
         color="white"
         position="relative"
         overflow="hidden"
+        boxShadow="gradient-lg"
+        border="1px solid"
+        borderColor="brand.200"
       >
         <Box position="relative" zIndex={1}>
           <HStack justify="space-between" align="start" mb={4}>
@@ -235,10 +239,10 @@ const Dashboard: React.FC = () => {
               <Text fontSize="lg" opacity={0.9}>
                 {getGreeting()}, {currentUser?.displayName?.split(' ')[0] || 'Student'}! 👋
               </Text>
-              <Heading size="xl" fontWeight="bold">
+              <Heading size="xl" fontWeight="bold" color="gray.800">
                 Ready to continue learning?
               </Heading>
-              <Text opacity={0.9} maxW="md">
+              <Text opacity={0.8} maxW="md" color="gray.700">
                 {stats.streak > 0 
                   ? `You're on a ${stats.streak}-day learning streak! Keep it up to reach your weekly goal.`
                   : 'Start your learning journey today!'
@@ -247,23 +251,23 @@ const Dashboard: React.FC = () => {
             </VStack>
             <VStack align="end" spacing={2}>
               {stats.streak > 0 && (
-                <Badge colorScheme="yellow" variant="solid" px={3} py={1} borderRadius="full">
+                <Badge variant="gradient" px={4} py={2} borderRadius="full" fontSize="sm">
                   🔥 {stats.streak} Day Streak
                 </Badge>
               )}
-              <Text fontSize="sm" opacity={0.8}>
+              <Text fontSize="sm" opacity={0.8} color="gray.700">
                 {stats.completedThisWeek}/{stats.weeklyGoal} lessons this week
               </Text>
             </VStack>
           </HStack>
           
           {userProgress?.current_lesson ? (
-            <Card bg="whiteAlpha.200" backdropFilter="blur(10px)" border="1px solid" borderColor="whiteAlpha.300">
+            <Card bg="whiteAlpha.200" backdropFilter="blur(10px)" border="1px solid" borderColor="whiteAlpha.300" borderRadius="2xl">
               <CardBody>
                 <HStack justify="space-between" mb={3}>
                   <VStack align="start" spacing={1}>
-                    <Text fontSize="sm" opacity={0.9}>Continue Learning</Text>
-                    <Text fontWeight="bold">{userProgress.current_lesson.title}</Text>
+                    <Text fontSize="sm" opacity={0.9} color="gray.700">Continue Learning</Text>
+                    <Text fontWeight="bold" color="gray.800">{userProgress.current_lesson.title}</Text>
                   </VStack>
                   <Button
                     leftIcon={<FiPlay />}
@@ -272,6 +276,7 @@ const Dashboard: React.FC = () => {
                     size="sm"
                     as={RouterLink}
                     to={`/lessons/${userProgress.current_lesson.lesson_id}`}
+                    borderRadius="xl"
                   >
                     Resume
                   </Button>
@@ -283,19 +288,19 @@ const Dashboard: React.FC = () => {
                   borderRadius="full"
                   size="sm"
                 />
-                <HStack justify="space-between" mt={2} fontSize="sm" opacity={0.9}>
+                <HStack justify="space-between" mt={2} fontSize="sm" opacity={0.9} color="gray.700">
                   <Text>{Math.round(userProgress.current_lesson.progress * 100)}% complete</Text>
                 </HStack>
               </CardBody>
             </Card>
           ) : (
-            <Card bg="whiteAlpha.200" backdropFilter="blur(10px)" border="1px solid" borderColor="whiteAlpha.300">
+            <Card bg="whiteAlpha.200" backdropFilter="blur(10px)" border="1px solid" borderColor="whiteAlpha.300" borderRadius="2xl">
               <CardBody textAlign="center">
                 <VStack spacing={3}>
-                  <Icon as={FiBook} boxSize={8} opacity={0.8} />
+                  <Icon as={FiBook} boxSize={8} opacity={0.8} color="gray.700" />
                   <VStack spacing={1}>
-                    <Text fontWeight="bold">Ready to start learning?</Text>
-                    <Text fontSize="sm" opacity={0.8}>Browse our lessons to begin your journey</Text>
+                    <Text fontWeight="bold" color="gray.800">Ready to start learning?</Text>
+                    <Text fontSize="sm" opacity={0.8} color="gray.700">Browse our lessons to begin your journey</Text>
                   </VStack>
                   <Button
                     leftIcon={<FiBook />}
@@ -304,6 +309,7 @@ const Dashboard: React.FC = () => {
                     size="sm"
                     as={RouterLink}
                     to="/lessons"
+                    borderRadius="xl"
                   >
                     Browse Lessons
                   </Button>
@@ -321,7 +327,7 @@ const Dashboard: React.FC = () => {
           w="400px"
           h="400px"
           borderRadius="full"
-          bg="whiteAlpha.100"
+          bgGradient="radial(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%)"
           filter="blur(100px)"
         />
       </Box>
@@ -361,14 +367,14 @@ const Dashboard: React.FC = () => {
       <Grid templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(3, 1fr)' }} gap={8}>
         {/* Recent Activity */}
         <GridItem colSpan={{ base: 1, lg: 2 }}>
-          <Card bg={cardBg} h="fit-content">
+          <Card bg={cardBg} h="fit-content" borderRadius="2xl" boxShadow="gradient-md">
             <CardHeader>
               <HStack justify="space-between">
                 <HStack>
                   <Icon as={FiTrendingUp} color="brand.500" />
                   <Heading size="md">Recent Activity</Heading>
                 </HStack>
-                <Button variant="ghost" size="sm" rightIcon={<FiChevronRight />}>
+                <Button variant="ghost" size="sm" rightIcon={<FiChevronRight />} borderRadius="xl">
                   View All
                 </Button>
               </HStack>
@@ -396,6 +402,7 @@ const Dashboard: React.FC = () => {
                     size="sm"
                     as={RouterLink}
                     to="/lessons"
+                    borderRadius="xl"
                   >
                     Browse Lessons
                   </Button>
@@ -409,7 +416,7 @@ const Dashboard: React.FC = () => {
         <GridItem>
           <VStack spacing={6} align="stretch">
             {/* Quick Actions */}
-            <Card bg={cardBg}>
+            <Card bg={cardBg} borderRadius="2xl" boxShadow="gradient-md">
               <CardHeader>
                 <Heading size="md">Quick Actions</Heading>
               </CardHeader>
@@ -422,6 +429,7 @@ const Dashboard: React.FC = () => {
                     justifyContent="flex-start"
                     as={RouterLink}
                     to="/lessons"
+                    borderRadius="xl"
                   >
                     Browse Lessons
                   </Button>
@@ -432,6 +440,7 @@ const Dashboard: React.FC = () => {
                     justifyContent="flex-start"
                     as={RouterLink}
                     to="/qa"
+                    borderRadius="xl"
                   >
                     Ask AI Tutor
                   </Button>
@@ -440,6 +449,7 @@ const Dashboard: React.FC = () => {
                     colorScheme="green"
                     variant="outline"
                     justifyContent="flex-start"
+                    borderRadius="xl"
                   >
                     Schedule Study Time
                   </Button>
@@ -448,7 +458,7 @@ const Dashboard: React.FC = () => {
             </Card>
 
             {/* Recommended Lessons */}
-            <Card bg={cardBg}>
+            <Card bg={cardBg} borderRadius="2xl" boxShadow="gradient-md">
               <CardHeader>
                 <Heading size="md">Recommended for You</Heading>
               </CardHeader>
@@ -479,6 +489,7 @@ const Dashboard: React.FC = () => {
                   rightIcon={<FiChevronRight />}
                   as={RouterLink}
                   to="/lessons"
+                  borderRadius="xl"
                 >
                   View All Lessons
                 </Button>
@@ -487,7 +498,7 @@ const Dashboard: React.FC = () => {
 
             {/* Achievement */}
             {stats.lessonsCompleted >= 10 && (
-              <Card bg={cardBg} borderColor="yellow.200" borderWidth="2px">
+              <Card bg={cardBg} borderColor="yellow.200" borderWidth="2px" borderRadius="2xl" boxShadow="gradient-md">
                 <CardBody textAlign="center">
                   <Icon as={FiAward} boxSize={8} color="yellow.500" mb={2} />
                   <Text fontWeight="bold" mb={1}>Achievement Unlocked!</Text>
@@ -516,14 +527,16 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value, helpText, color
   const cardBg = useColorModeValue('white', 'gray.800');
   
   return (
-    <Card bg={cardBg}>
+    <Card bg={cardBg} borderRadius="2xl" boxShadow="gradient-md">
       <CardBody>
         <Stat>
           <HStack mb={2}>
             <Icon as={icon} color={`${colorScheme}.500`} boxSize={5} />
             <StatLabel fontSize="sm" fontWeight="medium">{label}</StatLabel>
           </HStack>
-          <StatNumber fontSize="2xl" fontWeight="bold">{value}</StatNumber>
+          <StatNumber fontSize="2xl" fontWeight="bold" bgGradient="linear(135deg, #A855F7 0%, #3B82F6 100%)" bgClip="text">
+            {value}
+          </StatNumber>
           <StatHelpText fontSize="xs">{helpText}</StatHelpText>
         </Stat>
       </CardBody>
@@ -557,14 +570,14 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
   const { icon, color } = getActivityIcon(activity.type);
 
   return (
-    <HStack spacing={3} p={3} borderRadius="lg" _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}>
+    <HStack spacing={3} p={3} borderRadius="xl" _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}>
       <Icon as={icon} color={color} boxSize={5} />
       <VStack align="start" spacing={0} flex={1}>
         <Text fontWeight="medium" fontSize="sm">{activity.title}</Text>
         <Text fontSize="xs" color="gray.500">{activity.time}</Text>
       </VStack>
       {activity.score && (
-        <Badge colorScheme="green" variant="subtle">
+        <Badge variant="gradient" borderRadius="full">
           {activity.score}%
         </Badge>
       )}
@@ -599,7 +612,7 @@ const RecommendedLessonCard: React.FC<RecommendedLessonCardProps> = ({ lesson })
     <HStack
       spacing={3}
       p={3}
-      borderRadius="lg"
+      borderRadius="xl"
       _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
       cursor="pointer"
       transition="all 0.2s"
@@ -609,12 +622,14 @@ const RecommendedLessonCard: React.FC<RecommendedLessonCardProps> = ({ lesson })
       <Box
         w="50px"
         h="50px"
-        borderRadius="lg"
-        bg="brand.100"
+        borderRadius="xl"
+        bgGradient="linear(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)"
         display="flex"
         alignItems="center"
         justifyContent="center"
         flexShrink={0}
+        border="1px solid"
+        borderColor="brand.200"
       >
         <Icon as={FiBook} color="brand.500" />
       </Box>
@@ -623,7 +638,7 @@ const RecommendedLessonCard: React.FC<RecommendedLessonCardProps> = ({ lesson })
           {lesson.title}
         </Text>
         <HStack spacing={2}>
-          <Badge colorScheme={getDifficultyColor(lesson.difficulty)} size="sm">
+          <Badge colorScheme={getDifficultyColor(lesson.difficulty)} size="sm" borderRadius="full">
             {lesson.difficulty}
           </Badge>
           <Text fontSize="xs" color="gray.500">

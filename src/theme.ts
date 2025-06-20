@@ -6,43 +6,67 @@ const config: ThemeConfig = {
   useSystemColorMode: true,
 };
 
-// Enhanced color palette with better accessibility
+// Enhanced color palette matching the logo design
 const colors = {
   brand: {
-    50: '#EBF8FF',
-    100: '#BEE3F8',
-    200: '#90CDF4',
-    300: '#63B3ED',
-    400: '#4299E1',
-    500: '#3182CE',
-    600: '#2B77CB',
-    700: '#2C5282',
-    800: '#2A4365',
-    900: '#1A365D',
+    50: '#F0F4FF',
+    100: '#E0E7FF',
+    200: '#C7D2FE',
+    300: '#A5B4FC',
+    400: '#818CF8',
+    500: '#6366F1', // Primary purple-blue
+    600: '#4F46E5',
+    700: '#4338CA',
+    800: '#3730A3',
+    900: '#312E81',
+  },
+  purple: {
+    50: '#FAF5FF',
+    100: '#F3E8FF',
+    200: '#E9D5FF',
+    300: '#D8B4FE',
+    400: '#C084FC',
+    500: '#A855F7', // Logo purple
+    600: '#9333EA',
+    700: '#7C3AED',
+    800: '#6B21A8',
+    900: '#581C87',
+  },
+  blue: {
+    50: '#EFF6FF',
+    100: '#DBEAFE',
+    200: '#BFDBFE',
+    300: '#93C5FD',
+    400: '#60A5FA',
+    500: '#3B82F6', // Logo blue
+    600: '#2563EB',
+    700: '#1D4ED8',
+    800: '#1E40AF',
+    900: '#1E3A8A',
   },
   accent: {
-    50: '#F7FAFC',
-    100: '#EDF2F7',
+    50: '#F8FAFC',
+    100: '#F1F5F9',
     200: '#E2E8F0',
     300: '#CBD5E0',
-    400: '#A0AEC0',
-    500: '#718096',
-    600: '#4A5568',
-    700: '#2D3748',
-    800: '#1A202C',
-    900: '#171923',
+    400: '#94A3B8',
+    500: '#64748B',
+    600: '#475569',
+    700: '#334155',
+    800: '#1E293B',
+    900: '#0F172A',
   },
   success: {
-    50: '#F0FFF4',
-    100: '#C6F6D5',
-    200: '#9AE6B4',
-    300: '#68D391',
-    400: '#48BB78',
-    500: '#38A169',
-    600: '#2F855A',
-    700: '#276749',
-    800: '#22543D',
-    900: '#1C4532',
+    50: '#ECFDF5',
+    100: '#D1FAE5',
+    200: '#A7F3D0',
+    300: '#6EE7B7',
+    400: '#34D399',
+    500: '#10B981',
+    600: '#059669',
+    700: '#047857',
+    800: '#065F46',
+    900: '#064E3B',
   },
   warning: {
     50: '#FFFBEB',
@@ -68,17 +92,11 @@ const colors = {
     800: '#991B1B',
     900: '#7F1D1D',
   },
-  purple: {
-    50: '#FAF5FF',
-    100: '#E9D8FD',
-    200: '#D6BCFA',
-    300: '#B794F6',
-    400: '#9F7AEA',
-    500: '#805AD5',
-    600: '#6B46C1',
-    700: '#553C9A',
-    800: '#44337A',
-    900: '#322659',
+  // Gradient colors matching the logo
+  gradient: {
+    primary: 'linear(135deg, #A855F7 0%, #3B82F6 100%)',
+    secondary: 'linear(135deg, #6366F1 0%, #8B5CF6 100%)',
+    accent: 'linear(135deg, #3B82F6 0%, #1D4ED8 100%)',
   }
 };
 
@@ -139,15 +157,15 @@ const space = {
   96: '24rem',
 };
 
-// Enhanced component styles with better accessibility
+// Enhanced component styles matching logo design
 const components = {
   Button: {
     baseStyle: {
       fontWeight: '600',
-      borderRadius: 'lg',
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+      borderRadius: '12px',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       _focus: {
-        boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.6)',
+        boxShadow: '0 0 0 3px rgba(163, 163, 163, 0.4)',
         outline: 'none',
       },
       _disabled: {
@@ -160,32 +178,32 @@ const components = {
         h: '8',
         minW: '8',
         fontSize: 'sm',
-        px: '3',
+        px: '4',
       },
       md: {
         h: '10',
         minW: '10',
         fontSize: 'md',
-        px: '4',
+        px: '6',
       },
       lg: {
         h: '12',
         minW: '12',
         fontSize: 'lg',
-        px: '6',
+        px: '8',
       },
     },
     variants: {
       solid: {
-        bg: 'brand.500',
+        bgGradient: 'linear(135deg, #A855F7 0%, #3B82F6 100%)',
         color: 'white',
         _hover: {
-          bg: 'brand.600',
-          transform: 'translateY(-1px)',
-          boxShadow: 'lg',
+          bgGradient: 'linear(135deg, #9333EA 0%, #2563EB 100%)',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 10px 25px -5px rgba(168, 85, 247, 0.4)',
         },
         _active: {
-          bg: 'brand.700',
+          bgGradient: 'linear(135deg, #7C3AED 0%, #1D4ED8 100%)',
           transform: 'translateY(0)',
         },
       },
@@ -193,10 +211,12 @@ const components = {
         border: '2px solid',
         borderColor: 'brand.500',
         color: 'brand.500',
+        bg: 'transparent',
         _hover: {
           bg: 'brand.50',
+          borderColor: 'brand.600',
           transform: 'translateY(-1px)',
-          boxShadow: 'md',
+          boxShadow: '0 4px 12px -2px rgba(99, 102, 241, 0.25)',
         },
         _active: {
           bg: 'brand.100',
@@ -207,6 +227,7 @@ const components = {
         color: 'brand.500',
         _hover: {
           bg: 'brand.50',
+          color: 'brand.600',
         },
         _active: {
           bg: 'brand.100',
@@ -217,14 +238,14 @@ const components = {
   Card: {
     baseStyle: {
       container: {
-        borderRadius: 'xl',
-        boxShadow: 'sm',
+        borderRadius: '20px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         border: '1px solid',
         borderColor: 'gray.200',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         _hover: {
-          boxShadow: 'md',
-          transform: 'translateY(-2px)',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          transform: 'translateY(-4px)',
         },
         _dark: {
           borderColor: 'gray.700',
@@ -233,25 +254,40 @@ const components = {
       },
       header: {
         p: '6',
-        pb: '0',
+        pb: '4',
       },
       body: {
         p: '6',
       },
       footer: {
         p: '6',
-        pt: '0',
+        pt: '4',
+      },
+    },
+    variants: {
+      gradient: {
+        container: {
+          bgGradient: 'linear(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+          borderColor: 'brand.200',
+          _dark: {
+            bgGradient: 'linear(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)',
+            borderColor: 'brand.600',
+          },
+        },
       },
     },
   },
   Input: {
     baseStyle: {
       field: {
-        borderRadius: 'lg',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        borderRadius: '12px',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         _focus: {
           borderColor: 'brand.500',
-          boxShadow: '0 0 0 1px rgba(49, 130, 206, 0.6)',
+          boxShadow: '0 0 0 1px rgba(99, 102, 241, 0.6)',
+        },
+        _hover: {
+          borderColor: 'brand.300',
         },
       },
     },
@@ -274,11 +310,14 @@ const components = {
   },
   Textarea: {
     baseStyle: {
-      borderRadius: 'lg',
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+      borderRadius: '12px',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       _focus: {
         borderColor: 'brand.500',
-        boxShadow: '0 0 0 1px rgba(49, 130, 206, 0.6)',
+        boxShadow: '0 0 0 1px rgba(99, 102, 241, 0.6)',
+      },
+      _hover: {
+        borderColor: 'brand.300',
       },
     },
   },
@@ -287,25 +326,31 @@ const components = {
       borderRadius: 'full',
       fontWeight: '600',
       fontSize: 'xs',
-      px: '2',
+      px: '3',
       py: '1',
+    },
+    variants: {
+      gradient: {
+        bgGradient: 'linear(135deg, #A855F7 0%, #3B82F6 100%)',
+        color: 'white',
+      },
     },
   },
   Alert: {
     baseStyle: {
       container: {
-        borderRadius: 'lg',
+        borderRadius: '16px',
         border: '1px solid',
       },
     },
     variants: {
       subtle: {
         container: {
-          bg: 'blue.50',
-          borderColor: 'blue.200',
+          bg: 'brand.50',
+          borderColor: 'brand.200',
           _dark: {
-            bg: 'blue.900',
-            borderColor: 'blue.700',
+            bg: 'brand.900',
+            borderColor: 'brand.700',
           },
         },
       },
@@ -315,16 +360,53 @@ const components = {
     baseStyle: {
       track: {
         borderRadius: 'full',
+        bg: 'gray.200',
+        _dark: {
+          bg: 'gray.700',
+        },
       },
       filledTrack: {
         borderRadius: 'full',
+        bgGradient: 'linear(135deg, #A855F7 0%, #3B82F6 100%)',
         transition: 'all 0.3s ease',
+      },
+    },
+  },
+  Stat: {
+    baseStyle: {
+      container: {
+        bg: 'white',
+        p: '6',
+        borderRadius: '16px',
+        border: '1px solid',
+        borderColor: 'gray.200',
+        _dark: {
+          bg: 'gray.800',
+          borderColor: 'gray.700',
+        },
+      },
+      number: {
+        fontWeight: 'bold',
+        bgGradient: 'linear(135deg, #A855F7 0%, #3B82F6 100%)',
+        bgClip: 'text',
+      },
+    },
+  },
+  Heading: {
+    baseStyle: {
+      fontWeight: 'bold',
+      lineHeight: 'shorter',
+    },
+    variants: {
+      gradient: {
+        bgGradient: 'linear(135deg, #A855F7 0%, #3B82F6 100%)',
+        bgClip: 'text',
       },
     },
   },
 };
 
-// Global styles
+// Global styles with logo-inspired design
 const styles = {
   global: (props: any) => ({
     body: {
@@ -348,7 +430,7 @@ const styles = {
     '*:focus': {
       outline: 'none',
     },
-    // Custom scrollbar
+    // Custom scrollbar with gradient
     '::-webkit-scrollbar': {
       width: '8px',
     },
@@ -356,11 +438,11 @@ const styles = {
       bg: props.colorMode === 'dark' ? 'gray.800' : 'gray.100',
     },
     '::-webkit-scrollbar-thumb': {
-      bg: props.colorMode === 'dark' ? 'gray.600' : 'gray.400',
+      background: 'linear-gradient(135deg, #A855F7 0%, #3B82F6 100%)',
       borderRadius: 'full',
     },
     '::-webkit-scrollbar-thumb:hover': {
-      bg: props.colorMode === 'dark' ? 'gray.500' : 'gray.500',
+      background: 'linear-gradient(135deg, #9333EA 0%, #2563EB 100%)',
     },
   }),
 };
@@ -392,15 +474,19 @@ const theme = extendTheme({
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
     '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    // Gradient shadows
+    'gradient-sm': '0 4px 6px -1px rgba(168, 85, 247, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06)',
+    'gradient-md': '0 10px 15px -3px rgba(168, 85, 247, 0.2), 0 4px 6px -2px rgba(59, 130, 246, 0.1)',
+    'gradient-lg': '0 20px 25px -5px rgba(168, 85, 247, 0.3), 0 10px 10px -5px rgba(59, 130, 246, 0.2)',
   },
   radii: {
     none: '0',
-    sm: '0.125rem',
-    base: '0.25rem',
-    md: '0.375rem',
-    lg: '0.5rem',
-    xl: '0.75rem',
-    '2xl': '1rem',
+    sm: '0.25rem',
+    base: '0.375rem',
+    md: '0.5rem',
+    lg: '0.75rem',
+    xl: '1rem',
+    '2xl': '1.25rem',
     '3xl': '1.5rem',
     full: '9999px',
   },
